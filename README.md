@@ -24,6 +24,11 @@ We have a bi-weekly meeting call. Please come and join! All are welcome to come 
 
 ## Development
 
+Install yarn:
+```bash
+conda install -c conda-forge yarn
+```
+
 Start todo example:
 
 ![](./scratch/todo.gif)
