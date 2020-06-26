@@ -3,6 +3,7 @@ import { Fields } from "@lumino/datastore";
 import { createSchemas } from "rtc-node";
 import { ReadonlyJSONObject, ReadonlyJSONValue } from "@lumino/coreutils";
 
+// TODO: Add injestion for changes?
 // TODO: Add state machine possibility to tables?
 // Questions:
 // 1. Should an execute request be linked to a cell? So if I run execute and then someone
@@ -44,7 +45,7 @@ export const schemas = createSchemas({
   },
   // https://jupyter-client.readthedocs.io/en/stable/messaging.html#kernel-info
   kernels: {
-  // https://github.com/jupyter/jupyter_server/blob/master/jupyter_server/gateway/managers.py#L345
+    // https://github.com/jupyter/jupyter_server/blob/master/jupyter_server/gateway/managers.py#L345
 
     name: Fields.String(),
     pwd: Fields.String(),
@@ -59,14 +60,18 @@ export const schemas = createSchemas({
         }
     >({ value: { state: "requested" } }),
   },
-  // sessions: {
-  //   kernel_id: Fields.String(),
-  //   content_id: Fields.String(),
-  //   state: Fields.Register<
-  //     | { label: "pending"; kernel: { name: string } }
-  //     | { label: "created"; kernelID: string }
-  //   >({ value: { label: "pending", kernel: { name: "" } } }),
-  // },
+  sessions: {
+    kernel_id: Fields.String(),
+    content_id: Fields.String(),
+    state: Fields.Register<
+      | { state: "requested" }
+      | {
+          state: "created";
+          // Jupyter server ID
+          id: string;
+        }
+    >({ value: { state: "requested" } }),
+  },
   contents: {
     name: Fields.String(),
     path: Fields.String(),
