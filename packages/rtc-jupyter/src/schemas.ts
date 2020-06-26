@@ -31,36 +31,42 @@ export const schemas = createSchemas({
       };
     }>({ value: null }),
   },
-  status: {
-    // Table with only one row
-    started: Fields.String(),
-    last_activity: Fields.String(),
-    // TODO: Remove if we can compute dynamically?
-    connections: Fields.Number(),
-    kernels: Fields.Number(),
-  },
+  // status: {
+  //   // Table with only one row
+  //   started: Fields.String(),
+  //   last_activity: Fields.String(),
+  //   // TODO: Remove if we can compute dynamically?
+  //   connections: Fields.Number(),
+  //   kernels: Fields.Number(),
+  // },
   terminals: {
     name: Fields.String(),
   },
+  // https://jupyter-client.readthedocs.io/en/stable/messaging.html#kernel-info
   kernels: {
-    // TODO: Add session number?
-    // TODO: Add info returned by kernal info request
-    // TODO: add kernel info requests
+  // https://github.com/jupyter/jupyter_server/blob/master/jupyter_server/gateway/managers.py#L345
+
     name: Fields.String(),
-    last_activity: Fields.String(),
-    connections: Fields.Number(),
-    execution_state: Fields.Number(),
-    status: Fields.Register<"busy" | "idle" | "starting">({ value: "idle" }),
-  },
-  sessions: {
-    path: Fields.String(),
-    name: Fields.String(),
-    type: Fields.String(),
+    pwd: Fields.String(),
     state: Fields.Register<
-      | { label: "pending"; kernel: { name: string } }
-      | { label: "created"; kernelID: string }
-    >({ value: { label: "pending", kernel: { name: "" } } }),
+      | { state: "requested" }
+      | {
+          // TODO: Add kernel info request
+          state: "created";
+          id: string;
+          execution: "busy" | "idle" | "starting";
+          session: number;
+        }
+    >({ value: { state: "requested" } }),
   },
+  // sessions: {
+  //   kernel_id: Fields.String(),
+  //   content_id: Fields.String(),
+  //   state: Fields.Register<
+  //     | { label: "pending"; kernel: { name: string } }
+  //     | { label: "created"; kernelID: string }
+  //   >({ value: { label: "pending", kernel: { name: "" } } }),
+  // },
   contents: {
     name: Fields.String(),
     path: Fields.String(),
@@ -112,6 +118,7 @@ export const schemas = createSchemas({
     // Need to keep copy of code, because need to know what it was, if notebook then changes
     code: Fields.String(),
     kernel: Fields.Register<null | {
+      // the datastore ID not the jupyter server ID
       id: string;
       session: number;
     }>({ value: null }),
