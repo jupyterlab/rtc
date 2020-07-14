@@ -15,7 +15,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="0.92.2 5c3e80d, 2017-08-06"
-   sodipodi:docname="architecture.svg">
+   sodipodi:docname="dev.svg">
   <defs
      id="defs2">
     <marker
@@ -290,8 +290,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="399.62187"
-     inkscape:cy="821.84005"
+     inkscape:cx="309.62187"
+     inkscape:cy="461.84005"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -309,7 +309,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -388,25 +388,25 @@
        style="opacity:0.82399998;fill:none;fill-opacity:1;stroke:#00000e;stroke-width:0.35277778;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <text
        id="text866"
-       y="196.98726"
-       x="56.356266"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       y="203.33719"
+       x="69.623329"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
-         style="stroke-width:0.26458332"
-         y="196.98726"
-         x="56.356266"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
+         y="203.33719"
+         x="69.623329"
          id="tspan864"
          sodipodi:role="line">lumino-datastore</tspan><tspan
-         style="stroke-width:0.26458332"
-         y="201.39699"
-         x="56.356266"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
+         y="207.74692"
+         x="69.623329"
          sodipodi:role="line"
-         id="tspan16600">(or </tspan><tspan
-         style="stroke-width:0.26458332"
-         y="205.8067"
-         x="56.356266"
+         id="tspan16600">or</tspan><tspan
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
+         y="212.15663"
+         x="69.623329"
          sodipodi:role="line"
-         id="tspan16602">rtc-store-dummy)</tspan></text>
+         id="tspan16602">rtc-store-dummy</tspan></text>
     <rect
        style="opacity:0.82399998;fill:none;fill-opacity:1;stroke:#00000e;stroke-width:0.35277778;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect874"
@@ -458,25 +458,25 @@
        ry="1.3476721" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="161.39561"
-       y="195.13519"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="174.66267"
+       y="200.95596"
        id="text890"><tspan
          sodipodi:role="line"
          id="tspan888"
-         x="161.39561"
-         y="195.13519"
-         style="stroke-width:0.26458332">lumino-datastore</tspan><tspan
+         x="174.66267"
+         y="200.95596"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332">lumino-datastore</tspan><tspan
          sodipodi:role="line"
-         x="161.39561"
-         y="199.54492"
-         style="stroke-width:0.26458332"
-         id="tspan16604">(or </tspan><tspan
+         x="175.15187"
+         y="205.36569"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
+         id="tspan16604">or </tspan><tspan
          sodipodi:role="line"
-         x="161.39561"
-         y="203.95464"
-         style="stroke-width:0.26458332"
-         id="tspan16606">rtc-store-dummy)</tspan></text>
+         x="174.66267"
+         y="209.77541"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
+         id="tspan16606">rtc-store-dummy</tspan></text>
     <rect
        style="opacity:0.82399998;fill:none;fill-opacity:1;stroke:#00000e;stroke-width:0.35277778;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect911"
@@ -501,12 +501,12 @@
          x="97.494186"
          y="121.4951"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         id="tspan917">-</tspan><tspan
+         id="tspan917" /><tspan
          sodipodi:role="line"
          x="97.494186"
          y="125.90482"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         id="tspan923">Keeps</tspan><tspan
+         id="tspan923">Keep</tspan><tspan
          sodipodi:role="line"
          x="97.494186"
          y="130.31454"
@@ -514,7 +514,7 @@
          id="tspan919">synchronised</tspan><tspan
          sodipodi:role="line"
          x="97.494186"
-         y="134.72426"
+         y="134.72427"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan921">list of patches</tspan></text>
     <path
@@ -594,27 +594,6 @@
        y="56.0294"
        rx="1.7929806"
        ry="1.3476721" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="131.23334"
-       y="60.198055"
-       id="text2053"><tspan
-         sodipodi:role="line"
-         id="tspan2051"
-         x="131.23334"
-         y="60.198055"
-         style="stroke-width:0.26458332">lumino-datastore</tspan><tspan
-         sodipodi:role="line"
-         x="131.23334"
-         y="64.60778"
-         style="stroke-width:0.26458332"
-         id="tspan16608">(or </tspan><tspan
-         sodipodi:role="line"
-         x="131.23334"
-         y="69.017502"
-         style="stroke-width:0.26458332"
-         id="tspan16610">rtc-store-dummy)</tspan></text>
     <path
        sodipodi:nodetypes="cc"
        style="fill:none;stroke:#000000;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker2375);marker-end:url(#marker2415)"
@@ -728,46 +707,46 @@
        style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker5669)" />
     <path
        style="fill:none;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#marker6539)"
-       d="m 146.57925,205.45432 -8.79486,5.87469"
+       d="m 147.10842,205.18974 -9.32403,6.13927"
        id="path6535"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <text
        id="text6801"
        y="225.03369"
-       x="126.5969"
+       x="125.0094"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="225.03369"
-         x="126.5969"
+         x="125.0094"
          id="tspan6799"
          sodipodi:role="line">Debugger can</tspan><tspan
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="229.44342"
-         x="126.5969"
+         x="125.0094"
          sodipodi:role="line"
          id="tspan6803">be used to display</tspan><tspan
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          y="233.85313"
-         x="126.5969"
+         x="125.0094"
          sodipodi:role="line"
-         id="tspan6805">datastore tables</tspan></text>
+         id="tspan6805">store tables</tspan></text>
     <text
        id="text7635"
-       y="103.30645"
-       x="124.52982"
+       y="103.83561"
+       x="126.3819"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         y="103.30645"
-         x="124.52982"
+         y="103.83561"
+         x="126.3819"
          id="tspan7631"
          sodipodi:role="line">socket.io</tspan><tspan
          id="tspan7633"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         y="107.71617"
-         x="124.52982"
+         y="108.24533"
+         x="126.3819"
          sodipodi:role="line">(port 8888)</tspan></text>
     <path
        inkscape:connector-curvature="0"
@@ -778,17 +757,17 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="135.66112"
-       y="157.40511"
+       x="131.69237"
+       y="153.70094"
        id="text7655"><tspan
          sodipodi:role="line"
          id="tspan7651"
-         x="135.66112"
-         y="157.40511"
+         x="131.69237"
+         y="153.70094"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332">socket.io</tspan><tspan
          sodipodi:role="line"
-         x="135.66112"
-         y="161.81483"
+         x="131.69237"
+         y="158.11067"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan7653">(port 8888)</tspan></text>
     <text
@@ -841,35 +820,56 @@
        sodipodi:nodetypes="cc" />
     <text
        id="text17888"
-       y="245.62726"
+       y="246.42094"
        x="79.465408"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"><tspan
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         y="245.62726"
+         y="246.42094"
          x="79.465408"
          id="tspan17884"
          sodipodi:role="line">HTTP</tspan><tspan
          id="tspan17886"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
-         y="250.03699"
+         y="250.83067"
          x="79.465408"
          sodipodi:role="line">(port 3000)</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="185.56332"
-       y="240.07103"
+       y="246.42094"
        id="text17894"><tspan
          sodipodi:role="line"
          id="tspan17890"
          x="185.56332"
-         y="240.07103"
+         y="246.42094"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332">HTTP</tspan><tspan
          sodipodi:role="line"
          x="185.56332"
-         y="244.48076"
+         y="250.83067"
          style="text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan17892">(port 3000)</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:3.52777767px;line-height:1.25;font-family:arial;-inkscape-font-specification:'arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:center;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="144.50041"
+       y="65.489273"
+       id="text1062"><tspan
+         sodipodi:role="line"
+         id="tspan1056"
+         x="144.50041"
+         y="65.489273"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332">lumino-datastore</tspan><tspan
+         id="tspan1058"
+         sodipodi:role="line"
+         x="144.50041"
+         y="69.899002"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332">or</tspan><tspan
+         id="tspan1060"
+         sodipodi:role="line"
+         x="144.50041"
+         y="74.308716"
+         style="text-align:center;text-anchor:middle;stroke-width:0.26458332">rtc-store-dummy</tspan></text>
   </g>
 </svg>
