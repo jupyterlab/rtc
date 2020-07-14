@@ -1,4 +1,4 @@
-sphinx
+sphinx<3,>=2
 myst-parser[sphinx]
 sphinx_book_theme
 sphinx-togglebutton
