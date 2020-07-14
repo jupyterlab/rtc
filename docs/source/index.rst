@@ -9,13 +9,18 @@ Jupyter RTC is the next-generation web-based user interface for Project Jupyter.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developer Guide
+   :caption: Technical Guide
 
+   developer/design
    developer/architecture
+   developer/spec
+   developer/examples
+   developer/landscape
 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Landscape
+   :caption: Organisation
 
-   landscape/landscape
+   organisation/contributing
+   organisation/czi-2020-proposal

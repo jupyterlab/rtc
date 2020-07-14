@@ -1,7 +1,5 @@
 # Design
 
-![](./scratch/diagram.png)
-
 ## Goals
 
 The goal of this repo is to prototype a data model to support simultaneous distributed

@@ -1,4 +1,4 @@
-# Jupyter Real Time Data Model Specification
+# Specification
 
 This document is meant to serve as a way to specify the behavior of the protocols being developed in the `jupyterlab/rtc` repo. The hope for it would be start here, very much in flux, and then at some point, once it is settled down a bit, move into a JEP form.
 
@@ -15,7 +15,7 @@ This is really a family of specifications. They exist in levels, like the [OSI I
 
 ### 1. Jupyter RTC
 
-_The shared schemas are in[`packages/rtc-jupyter`](https://github.com/jupyterlab/rtc/tree/master/packages/rtc-jupyter/src/schemas.ts) and the supernode is in [`packages/rtc-jupyter-supernode`](packages/rtc-jupyter-supernode/src/index.ts)_
+_The shared schemas are in[`packages/rtc-jupyter`](https://github.com/jupyterlab/rtc/tree/master/packages/rtc-jupyter/src/schemas.ts) and the supernode is in [`packages/rtc-jupyter-supernode`](https://github.com/jupyterlab/rtc/tree/master/packages/rtc-jupyter-supernode/src/index.ts)_
 
 The Jupyter RTC layer is meant to normalize data provided by the Jupyter Server into the RTC data model.
 
