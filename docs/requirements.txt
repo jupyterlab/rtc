@@ -1,5 +1,9 @@
-sphinx>=1.8
+sphinx
+myst-parser[sphinx]
+sphinx_book_theme
+sphinx-togglebutton
 sphinx-copybutton
+rinohtype
 sphinx_rtd_theme
 recommonmark
 pytest

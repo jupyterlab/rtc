@@ -37,7 +37,10 @@ from recommonmark.transform import AutoStructify
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'recommonmark',
+    "myst_parser",
+    "sphinx.ext.napoleon",
+    "sphinx_copybutton",
+    "sphinx_togglebutton",
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx_copybutton'
