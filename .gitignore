@@ -4,14 +4,16 @@ _vendor*/*
 node_modules
 yarn.lock
 yarn-error.log
-lib
 build
 coverage
+dist
+lib
 __pycache__
 *.code-workspace
 *.ipynb
 *.profraw
 *.tsbuildinfo
+*.egg-info
 
 # Include.
 !**/.*ignore
@@ -19,4 +21,5 @@ __pycache__
 !**/.*rc.js
 !**/.*config
 !**/.github
+!**/.readthedocs.yml
 !**/.storybook

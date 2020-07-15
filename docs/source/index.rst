@@ -11,6 +11,14 @@ Jupyter RTC follows the Jupyter `Community Guides <https://jupyter.readthedocs.i
 
 .. toctree::
    :maxdepth: 1
+   :caption: Cases
+
+   cases/typical-solutions
+   cases/user-stories
+
+
+.. toctree::
+   :maxdepth: 1
    :caption: Technical Guide
 
    developer/design
