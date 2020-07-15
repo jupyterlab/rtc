@@ -30,6 +30,8 @@ setup(
     keywords="jupyter rtc",
     python_requires=">=3.6",
     install_requires=[
+        "fastapi",
+        "typing",
     ],
     extras_require={
         "sphinx": [],

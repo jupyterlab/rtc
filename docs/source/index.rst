@@ -5,7 +5,7 @@
 Jupyter RTC Documentation
 =========================
 
-Jupyter RTC is the next-generation web-based user interface for Project Jupyter. 
+Jupyter RTC is the next-generation web-based user interface for Project Jupyter.
 
 Jupyter RTC follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
