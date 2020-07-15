@@ -47,6 +47,7 @@ setup(
         ],
         # Note: This is only required for internal use
         "rtd": [
+            "myst_parser",
             "markdown-it-py~=0.4.5",
             "pyyaml",
             "docutils>=0.15",
