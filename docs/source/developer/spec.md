@@ -9,7 +9,7 @@ This is really a family of specifications. They exist in levels, like the [OSI I
 1. Jupyter RTC: Specification of the schemas that correspond to the entities in the Jupyter Server and a specification of how the supernode interacts with these records. There are other protocols at this level as well, for things like chat, commenting, Jupyter Widgets and other extensions.
 2. RTC: Specification of how to represent schemas and how updates to the data in those schemas can be serialized as transactions.
 3. Synchronized append only log: Provides a way to share between all clients a shared append only log of transactions.
-4. Bidirectional asynchronous communucation: Allows clients to send and recieve messages to one another.
+4. [Bidirectional asynchronous communication](bi-async-comm): Allows clients to send and recieve messages to one another.
 
 ## Layers
 
@@ -24,7 +24,6 @@ It specifies the schemas this relies on in the data model and it the behavior of
 #### Schemas
 
 This is a list of schemas, with types written as TS types that can be mapped to JSON schema:
-
 
 ##### `executions`
 
@@ -51,9 +50,7 @@ Any record from the `executions` table that has a state of `"requested"` will be
 
 TODO: Specify this more precisely based on Jupyter messaging spec.
 
-
 etc...
-
 
 ### 2. RTC
 
@@ -110,7 +107,7 @@ TODO:
 
 - Retries/confirmation
 
-### 4. Bidirectional asyncronous communication
+### 4. Bidirectional Asynchronous communication
 
 This layer provides a way for a client and a server to send each other messages. We currently use [socket.io](https://github.com/socketio/socket.io) for this.
 
@@ -145,4 +142,3 @@ There have been a couple of points raised by folks that make me think we might w
 * Having one jupyter client talking to many jupyter servers, if you have work in multiple places
 
 We could add a `host` field to the `kernelspecs` schemas with a uniqiue ID so that each each server would only execute kernels that come from kernelspecs that it owns.
-

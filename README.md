@@ -5,24 +5,7 @@ collaboration for use in JupyterLab and other Jupyter applications.
 
 ## About the RTC project
 
-We have today the following packages available:
 
-- `packages/rtc-relay`: Patch relay server to synchronize patches for `packages/rtc-node`.
-- `packages/rtc-node`: Real time collaboration client, builds on `@lumino/datastore`.
-- `packages/rtc-jupyter`: Holds schema for Jupyter RTC tables that are used in server and client.
-- `packages/rtc-jupyter-supernode`: Server to keep datastore in sync with jupyter server.
-
-You can use those packages with examples:
-
-- `packages/rtc-todo-example`: Example of simple todo app using relay server and node.
-- `packages/rtc-jupyter-example`: Client to access Jupyter data.
-
-It is currently in the planning stage, but eventually we see the repo containing
-a number of additinal separate projects like:
-
-- `src/jupyter_rtc_supernode_jupyter_extension`: Jupyter Server extension for running `packages/jupyter-rtc-supernode`.
-- `src/rtc_relay_jupyter_extension`: Jupyter Server Extension for `src/rtc_relay`
-- `packages/jupyterlab-rtc-client`: `packages/rtc-client` that connects over `src/rtc_relay_jupyter`.
 
 ### Project meeting schedule
 
@@ -40,20 +23,20 @@ us for the first time or need a refresher about the project's scope, we
 recommend reading the following documents:
 
 - This `README.md`.
-- The [Specification](./docs/source/developer/spec.md): We are working on creating a living specification for the protocol(s) created
-here. We're doing our best but it may not always be totally in sync with explorations in the repo, until they are settled on.
-- the [Design](./docs/source/developer/design.md) document.
-- Current vision in grant proposal for CZI [`CZI-2020-proposal.md`](./docs/source/organisation/czi-2020-proposal.md).
+- The [Specification](https://jupyter-rtc.readthedocs.io/developer/spec.html): We are working on creating a living specification for the protocol(s) created here. We're doing our best but it may not always be totally in sync with explorations in the repo, until they are settled on.
+- The [Design](https://jupyter-rtc.readthedocs.io/developer/design.html) document.
+- The [Architecture](https://jupyter-rtc.readthedocs.io/developer/architecture.html) document.
+- Current vision in [grant proposal for CZI](https://jupyter-rtc.readthedocs.io/organisation/czi-2020.html).
 
 ## Development
 
-Follow the instructions documented on the [Examples](./docs/source/developer/examples.rst)
+Follow the instructions documented on the [examples](https://jupyter-rtc.readthedocs.io/developer/example.html)
 
 ## Contribute
 
 We welcome any and all contributions and ideas here! This is a big task and we
-will need as much help as we can get. The [`contributing`](./docs/source/organisation/contributing.md)
-file contains more specific information.
+will need as much help as we can get. The [contribute](https://jupyter-rtc.readthedocs.io/organisation/contribute.html)
+page contains more specific information.
 
 ### Current work on JupyterLab
 
