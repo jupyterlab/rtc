@@ -2,7 +2,7 @@
 
 During this inception phase, please consider contributing on user stories, source code or documentation.
 
-For anything else, please open an issue on the [Issue Board](https://github.com/jupyter/rtc/issues) or join the [meetings](https://github.com/jupyterlab/rtc).
+For anything else, please open an issue on the [Issue Board](https://github.com/jupyterlab/rtc/issues) or join the [meetings](https://github.com/jupyterlab/rtc).
 
 ## User Stories
 

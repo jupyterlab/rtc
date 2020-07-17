@@ -8,7 +8,7 @@ Jupyter RTC is the realtime collaboration foundation for Project Jupyter and fol
 ```{note}
 The Jupyter RTC project is still in the inception stage and is rapidly evolving in terms of design
 and implementation. Use at your own risk. If you find any issues or have requirements, please report them 
-on the [Issue Board](https://github.com/jupyter/rtc/issues).
+on the [Issue Board](https://github.com/jupyterlab/rtc/issues).
 ```
 
 We welcome you to read to [contribute](organisation/contribute) to this project.
