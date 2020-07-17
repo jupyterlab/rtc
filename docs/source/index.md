@@ -11,7 +11,7 @@ and implementation. Use at your own risk. If you find any issues or have require
 on the [Issue Board](https://github.com/jupyterlab/rtc/issues).
 ```
 
-We welcome you to read to [contribute](organisation/contribute) to this project.
+We welcome you to [contribute](organisation/contribute) to this project.
 
 ## Site Contents
 
