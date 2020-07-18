@@ -2,19 +2,44 @@
 
 *Document under development*
 
-Loosely list of links to solutions and cases.
+Loosely list of links to existing implementations related in a way to RTC.
 
-Studies
+Cocalc
 
-- <https://dl.acm.org/doi/10.1145/3359141>
-- <https://ipitweb.files.wordpress.com/2019/06/wang_ipit-1.pdf>
+- <https://cocalc.com>
+- <https://blog.cocalc.com/2018/10/11/collaborative-editing.html>
 
-Microsoft
+HyperSwarm / Beaker
+
+- <https://pfrazee.hashbase.io/blog/hyperswarm>
+- <https://github.com/hypercore-protocol/hyperdrive>
+- <https://github.com/hyperswarm/hyperswarm>
+
+- <https://beakerbrowser.com>
+- <https://github.com/beakerbrowser>
+
+- <https://hyperdrive.network>
+- <https://github.com/beakerbrowser/hyperdrive.network>
+
+Crate
+
+- <https://github.com/chat-wane/crate>
+
+TinyMCE
+
+- <https://www.tiny.cloud/blog/real-time-collaborative-editing-slate-js>
+
+Visual Studio Code
 
 - <https://github.com/microsoftdocs/live-share>
 - <https://visualstudio.microsoft.com/services/live-share>
 
 - <https://support.microsoft.com/en-us/office/get-started-with-fluid-framework-preview-d05278db-b82b-4d1f-8523-cf0c9c2fb2df>
+
+Conclave
+
+- <https://conclave-team.github.io/conclave-site>
+- <https://github.com/conclave-team/conclave>
 
 Convergence Labs
 
@@ -42,36 +67,6 @@ WebRTC
 Editors
 
 - <https://www.pierrehedkvist.com/posts/4-open-source-collaborative-editors>
-
-Cocalc
-
-- <https://cocalc.com>
-- <https://blog.cocalc.com/2018/10/11/collaborative-editing.html>
-
-HyperSwarm / Beaker
-
-- <https://pfrazee.hashbase.io/blog/hyperswarm>
-- <https://github.com/hypercore-protocol/hyperdrive>
-- <https://github.com/hyperswarm/hyperswarm>
-
-- <https://beakerbrowser.com>
-- <https://github.com/beakerbrowser>
-
-- <https://hyperdrive.network>
-- <https://github.com/beakerbrowser/hyperdrive.network>
-
-Crate
-
-- <https://github.com/chat-wane/crate>
-
-TinyMCE
-
-- <https://www.tiny.cloud/blog/real-time-collaborative-editing-slate-js>
-
-Conclave
-
-- <https://conclave-team.github.io/conclave-site>
-- <https://github.com/conclave-team/conclave>
 
 Others
 

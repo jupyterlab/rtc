@@ -27,7 +27,7 @@ a number of additional separate projects like:
 
 ## Redux
 
-We may need to introduce a global state management `a-la-redux`.
+We may need to introduce a global state management `a-la-redux`. See the following repositories for inspiration.
 
 - <https://github.com/devresults/cevitxe>
 - <https://github.com/redux-orm/redux-orm>

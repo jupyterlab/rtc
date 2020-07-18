@@ -1,8 +1,6 @@
 # User Stories
 
-*Document under development*
-
-_During our first meeting we collected a few different user stories around this. Feel free to add to this if there are other points that should be considered._
+_During our first meeting we collected a few different user stories. We are looking to more elaborated and structured stories that should be considered._
 
 Once you have multiple users editing the same notebook, one fundamental question is if each user has their own kernel or not. In some ways, it's more intuitive if they have the same because as you can re-use state between kernels easily and the normal model is to have one kernel per notebook. However, it is also then easy to clobber each other's work. The simpler model to implement is one kernel per notebook, but it might be worth thinking about how to support the other as well.
 

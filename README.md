@@ -3,11 +3,7 @@
 This **Real Time Collaboration** monorepo contains current work on Real Time
 collaboration for use in JupyterLab and other Jupyter applications.
 
-## About the RTC project
-
-
-
-### Project meeting schedule
+### Project Meeting Schedule
 
 We have a bi-weekly meeting call. Please come and join! All are welcome to come
 and just listen or discuss any work related to this project. They are also
@@ -16,7 +12,7 @@ and notes, see [this hackmd](https://hackmd.io/@_4xc7QhhSHKODRQn1uiulw/BkV24I3qL
 
 We also use hackmd to set an agenda and to capture notes for these meetings.
 
-### Learning pathway
+### Learning Pathway
 
 We are striving to keep meetings productive and on topic. If you are joining
 us for the first time or need a refresher about the project's scope, we
@@ -28,9 +24,9 @@ recommend reading the following documents:
 - The [Architecture](https://jupyter-rtc.readthedocs.io/developer/architecture.html) document.
 - Current vision in [grant proposal for CZI](https://jupyter-rtc.readthedocs.io/organisation/czi-2020.html).
 
-## Development
+## Develop
 
-Follow the instructions documented on the [examples](https://jupyter-rtc.readthedocs.io/developer/example.html)
+Follow the instructions documented on the [examples](https://jupyter-rtc.readthedocs.io/developer/example.html).
 
 ## Contribute
 
@@ -40,4 +36,6 @@ page contains more specific information.
 
 ### Current work on JupyterLab
 
-Most of the work currently is living in [a PR to JupyterLab](https://github.com/jupyterlab/jupyterlab/pull/6871) and documented on [an issue](https://github.com/jupyterlab/jupyterlab/issues/5382) there.
+Most of the work currently is living in [a PR to JupyterLab](https://github.com/jupyterlab/jupyterlab/pull/6871) and documented on [an issue](https://github.com/jupyterlab/jupyterlab/issues/5382).
+
+The overall roadmap is defined in [Real Time Collaboration Plan](https://github.com/jupyterlab/team-compass/issues/30)

@@ -2,10 +2,8 @@
 
 *Document under development*
 
-Although not purely a RTC aspect, `Distributed Storage` systems often use some RTC under the hook,
-or can be used as underlying solution for RTC.
-
-We list here useful links.
+Although not purely a RTC aspect, `Distributed Storage` systems often use some RTC under-the-hood,
+or can be used as underlying solution for RTC. We list here useful links.
 
 ## DAT
 

@@ -7,12 +7,12 @@ Various RTC algorithms exist and compete in a way.
 - <https://www.tiny.cloud/blog/real-time-collaboration-ot-vs-crdt>
 - <https://blog.cocalc.com/2018/10/11/collaborative-editing.html>
 
-Some post-mortem stories are also available.
-
-- <https://github.com/xi-editor/xi-editor/issues/1187#issuecomment-491473599>
-- <https://news.ycombinator.com/item?id=19886883>
-
 ## CRTD (Conflict-free Replicated Data Type)
+
+To discover CRTDm, we invite you reading and listening to [The Hard Parts](https://martin.kleppmann.com/2020/07/06/crdt-hard-parts-hydra.html)
+([slides](https://speakerdeck.com/ept/crdts-the-hard-parts) - [video](https://www.youtube.com/watch?v=x7drE24geUw)).
+
+Then jump into the following links.
 
 - <https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type>
 - <https://github.com/yjs/yjs#Yjs-CRDT-Algorithm>
@@ -25,9 +25,12 @@ Some post-mortem stories are also available.
 - <https://github.com/phedkvist/crdt-server>
 - <https://www.figma.com/blog/how-figmas-multiplayer-technology-works>
 - <https://news.ycombinator.com/item?id=23802208>
-- <https://www.youtube.com/watch?v=x7drE24geUw>
 - <https://logux.io>
-- <https://martin.kleppmann.com/2020/07/06/crdt-hard-parts-hydra.html>
+
+Some post-mortem stories are also instructive.
+
+- <https://github.com/xi-editor/xi-editor/issues/1187#issuecomment-491473599>
+- <https://news.ycombinator.com/item?id=19886883>
 
 ## OT (Operational Transformation)
 

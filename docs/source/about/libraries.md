@@ -11,10 +11,6 @@
 
 - <https://github.com/jupyterlab/lumino/tree/master/packages/datastore>
 
-- [Add datastore support](https://github.com/jupyterlab/jupyterlab/pull/6871)
-- [Real Time Collaboration](https://github.com/jupyterlab/jupyterlab/issues/5382)
-- [Real Time Collaboration Plan](https://github.com/jupyterlab/team-compass/issues/30)
-
 ## Y.js
 
 - <https://github.com/yjs/yjs>
@@ -58,3 +54,7 @@
 ## Rust CRDT
 
 - <https://github.com/rust-crdt/rust-crdt>
+
+## Microsoft Fluid
+
+- <https://techcommunity.microsoft.com/t5/microsoft-365-blog/introducing-the-first-microsoft-fluid-framework-experiences-in/ba-p/1345543>
