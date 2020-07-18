@@ -1,9 +1,11 @@
 {
   "version": "0.0.0",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "scripts": {
     "build": "lerna run build",
     "build:test": "lerna run build:test",
