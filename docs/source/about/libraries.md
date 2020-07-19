@@ -69,24 +69,10 @@ A nested object CRDT, a hybrid logical clock with a rich-text CRDT.
 - <https://github.com/jaredly/local-first>
 - <https://jaredforsyth.com>
 
-## Rust CRDT
-
-- <https://github.com/rust-crdt/rust-crdt>
-
 ## CRDT by @phedkvist
 
 - <https://github.com/phedkvist/crdt-sequence>
 - <https://github.com/phedkvist/crdt-server>
-
-## Google Diff-Match-Patch
-
-- <https://github.com/google/diff-match-patch>
-
-## Diff-Sync by @janmonschke
-
-- <https://github.com/janmonschke/diffsync>
-- <https://github.com/janmonschke/diffsync-todos>
-- <https://diffsync-todos.herokuapp.com>
 
 ## Logux
 
@@ -95,6 +81,10 @@ Logux has features inspired by CRDT to resolve edit conflicts between users. Rea
 - <https://logux.io>
 - <https://github.com/logux/server>
 - <https://github.com/logux/client>
+
+## Rust CRDT
+
+- <https://github.com/rust-crdt/rust-crdt>
 
 ## ShareDB
 
@@ -115,6 +105,16 @@ Deprecated
 OT.js is not maintained anymore.
 
 - <https://github.com/Operational-Transformation/ot.js>
+
+## Google Diff-Match-Patch
+
+- <https://github.com/google/diff-match-patch>
+
+## Diff-Sync by @janmonschke
+
+- <https://github.com/janmonschke/diffsync>
+- <https://github.com/janmonschke/diffsync-todos>
+- <https://diffsync-todos.herokuapp.com>
 
 ## Microsoft Fluid
 
