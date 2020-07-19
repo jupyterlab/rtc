@@ -7,6 +7,8 @@ Various `RTC Algorithms` exist and compete in a way.
 - <https://medium.com/@raphlinus/towards-a-unified-theory-of-operational-transformation-and-crdt-70485876f72f>
 - <https://news.ycombinator.com/item?id=18191867>
 - <https://conclave-team.github.io/conclave-site>
+- <https://stackoverflow.com/questions/26694359/differences-between-ot-and-crdt>
+- <https://stackoverflow.com/questions/2043165/operational-transformation-library>
 
 We can class the RTC Algorithms into 3 families:
 
