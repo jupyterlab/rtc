@@ -3,7 +3,9 @@
   "private": true,
   "workspaces": {
     "packages": [
-      "packages/*"
+      "examples/*",
+      "packages/*",
+      "tools/*"
     ]
   },
   "scripts": {
@@ -21,7 +23,7 @@
     "test:ie": "lerna run test:ie --concurrency 1",
     "update:dependency": "update-dependency --lerna",
     "version": "lerna version",
-    "build:tsc": "tsc --build packages/*",
+    "build:tsc": "lerna run build:tsc",
     "relay:start": "yarn workspace rtc-relay run start",
     "relay:wait": "yarn workspace rtc-relay run wait",
     "todo:start": "yarn workspace rtc-todo-example run start",

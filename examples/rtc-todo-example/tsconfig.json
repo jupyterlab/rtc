@@ -1,14 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "noEmit": true,
     "outDir": "lib",
     "rootDir": "src",
-    "composite": true
+    "module": "esnext"
   },
-  "references": [
-    {
-      "path": "../rtc-node"
-    }
-  ],
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
