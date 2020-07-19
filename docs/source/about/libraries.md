@@ -9,17 +9,18 @@ Before jumping to a specific `RTC Library`, you may be interested in more genera
 ## Y.js
 
 - <https://github.com/yjs/yjs>
-- <https://github.com/yjs/yjs-demos>
 - <https://github.com/dmonad/lib0/blob/master/encoding.js#L1>
 - <https://github.com/dmonad/lib0>
 
+Y.js Demos
+
+- <https://github.com/yjs/yjs-demos>
 - <https://yjs.dev>
 - <https://yjs.dev/#demos>
 - <https://demos.yjs.dev>
 - <https://demos.yjs.dev/monaco/monaco.html>
 
 - <https://discuss.yjs.dev>
-- <https://www.tag1consulting.com>
 
 - <https://publishpress.com/blog/yjs>
 - <https://www.tag1consulting.com/blog/deep-dive-real-time-collaborative-editing-solutions-tagteamtalk-001-0>

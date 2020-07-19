@@ -6,10 +6,11 @@ Various `RTC Algorithms` exist and compete in a way.
 - <https://blog.cocalc.com/2018/10/11/collaborative-editing.html>
 - <https://medium.com/@raphlinus/towards-a-unified-theory-of-operational-transformation-and-crdt-70485876f72f>
 - <https://news.ycombinator.com/item?id=18191867>
+- <https://conclave-team.github.io/conclave-site>
 
 We can class the RTC Algorithms into 3 families:
 
-1. CRDT (doesn't need a server): Used by Riak, TomTom GPS, Teletype for Atom...
+1. CRDT (doesn't need a central server): Used by Riak, TomTom GPS, Teletype for Atom...
 2. OT (needs a central server): Used by Google Docs, Office365...
 3. Diffs: Used by Cocalc...
 
@@ -19,9 +20,7 @@ To discover CRTD (in relationship with OT), we invite you listening and reading:
 
 - <https://www.youtube.com/watch?v=yCcWpzY8dIA>
 - <https://www.youtube.com/watch?v=B5NULPSiOGw>
-- [The Hard Parts](https://martin.kleppmann.com/2020/07/06/crdt-hard-parts-hydra.html) and its references ([slides](https://speakerdeck.com/ept/crdts-the-hard-parts) - [1h10m video](https://www.youtube.com/watch?v=x7drE24geUw)).
-- <https://arxiv.org/abs/1608.03960>
-- <https://dl.acm.org/doi/10.1145/3359141>
+- <https://www.youtube.com/watch?v=vBU70EjwGfw>
 
 Then jump into the following links.
 
@@ -31,8 +30,10 @@ Then jump into the following links.
 - <https://digitalfreepen.com/2017/10/06/simple-real-time-collaborative-text-editor.html>
 - <https://www.youtube.com/watch?v=jIR0Ngov7vo>
 
+- <https://arxiv.org/abs/1608.03960>
+- <https://dl.acm.org/doi/10.1145/3359141>
+
 - <https://medium.com/@amberovsky/crdt-conflict-free-replicated-data-types-b4bfc8459d26>
-- <https://www.youtube.com/watch?v=vBU70EjwGfw>
 - <https://github.com/yjs/yjs#Yjs-CRDT-Algorithm>
 - <https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types>
 - <https://www.serverless.com/blog/crdt-explained-supercharge-serverless-at-edge>
@@ -43,14 +44,22 @@ Then jump into the following links.
 - <https://news.ycombinator.com/item?id=23802208>
 - <https://github.com/alangibson/awesome-crdt>
 
+Edge Cases
+
+- [The Hard Parts](https://martin.kleppmann.com/2020/07/06/crdt-hard-parts-hydra.html) and its references ([slides](https://speakerdeck.com/ept/crdts-the-hard-parts) - [1h10m video](https://www.youtube.com/watch?v=x7drE24geUw))
+
 RGA Split
 
 - <https://pages.lip6.fr/Marc.Shapiro/papers/rgasplit-group2016-11.pdf>
 
-Some post-mortem stories can also be instructive.
+Some post-mortem stories can also be instructive
 
 - <https://github.com/xi-editor/xi-editor/issues/1187#issuecomment-491473599>
 - <https://news.ycombinator.com/item?id=19886883>
+
+Apache Cassandra
+
+- <https://cassandra.apache.org/doc/latest/architecture/dynamo.html#dataset-partitioning-consistent-hashing>
 
 ## OT (Operational Transformation)
 
@@ -62,6 +71,10 @@ Google Wave
 
 - <https://www.youtube.com/watch?v=uOFzWZrsPV0>
 - <https://www.youtube.com/watch?v=3ykZYKCK7AM>
+
+Google Drive
+
+- <https://drive.googleblog.com/2010/09/whats-different-about-new-google-docs_22.html>
 
 Google / Dropbox System Design
 
@@ -87,9 +100,16 @@ Lessons Learned
 
 - <https://jneem.github.io/merging>
 
-## Paxos
+## Other Algorithms
 
-Does Paxos apply to RTC?
+Other algorithms in the `distributed` area.
+
+Paxos
 
 - <https://en.wikipedia.org/wiki/Paxos_(computer_science)>
 - <https://en.wikipedia.org/wiki/Gossip_protocol>
+
+Vector Clocks
+
+- <https://en.wikipedia.org/wiki/Vector_clock>
+- <https://www.datastax.com/blog/2013/09/why-cassandra-doesnt-need-vector-clocks>

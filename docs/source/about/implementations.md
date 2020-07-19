@@ -13,7 +13,7 @@ and [libraries](libraries.md) pages.
 
 **Visual Studio Code**
 
-Live Share from Microsoft is closed source.
+Live Share from Microsoft is closed-source.
 
 - <https://github.com/microsoftdocs/live-share>
 - <https://visualstudio.microsoft.com/services/live-share>
@@ -45,7 +45,7 @@ Live Share from Microsoft is closed source.
 - <https://github.com/convergencelabs/convergence-client-javascript>
 - <https://examples.convergence.io/examples/froala/?id=5e9c16f7-7f67-4732-b5d1-87e495c30c39>
 
-Convergence Labs on Cursor Movement
+Convergence Labs on Shared Cursor
 
 - https://examples.convergence.io/examples/froala/?id=9b9d01d1-3767-4326-9dc9-057db3582a5e
 - https://www.youtube.com/watch?v=42KDvoFqzsI
