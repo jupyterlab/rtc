@@ -101,6 +101,7 @@ Libraries for OT
 ## Differential Synchronization
 
 - <https://neil.fraser.name/writing/sync>
+- <https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/35605.pdf>
 
 ## Diffs and Merge
 
