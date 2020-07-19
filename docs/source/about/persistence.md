@@ -2,7 +2,7 @@
 
 ## Distributed Databases
 
-We list here some distributed databases.
+We list here some distributed databases with synchronisation capabilities.
 
 - <https://github.com/pouchdb/pouchdb>
 - <https://github.com/citusdata/citus>
@@ -11,19 +11,6 @@ We list here some distributed databases.
 - <https://gun.eco>
 - <https://github.com/kappa-db>
 - <https://dzone.com/articles/facebook-announces-apollo-qcon>
-
-- <https://github.com/share/sharedb>
-- <https://github.com/startupjs/startupjs>
-- <https://github.com/startupjs/startupjs/tree/master/packages/react-sharedb>
-- DEPRECATED <https://github.com/dmapper/react-sharedb>
-- DEPRECATED <https://github.com/josephg/ShareJS>
-- DEPRECATED <https://sharejs.org>
-
-## File Synchronisation
-
-File Synchronisation is a way to share content, but not really RTC.
-
-- <https://en.wikipedia.org/wiki/Comparison_of_file_synchronization_software>
 
 ## Distributed Storage
 
@@ -84,3 +71,9 @@ RON (Replicated Object Notation), a distributed live data format
 
 - <https://github.com/gritzko/ron>
 - <https://github.com/automerge/automerge/issues/266>
+
+## File Synchronisation
+
+File Synchronisation is a way to share content, but not really RTC.
+
+- <https://en.wikipedia.org/wiki/Comparison_of_file_synchronization_software>

@@ -4,9 +4,13 @@ Before jumping to a specific `RTC Library`, you may be interested in more genera
 
 ## Lumino
 
+CRDT Implementation by JupyterLab.
+
 - <https://github.com/jupyterlab/lumino/tree/master/packages/datastore>
 
 ## Y.js
+
+CRDT Implementation.
 
 - <https://github.com/yjs/yjs>
 - <https://github.com/dmonad/lib0/blob/master/encoding.js#L1>
@@ -60,6 +64,8 @@ String-wise sequence CRDT powering peer-to-peer collaborative editing in Teletyp
 
 ## Local First
 
+A nested object CRDT, a hybrid logical clock with a rich-text CRDT.
+
 - <https://github.com/jaredly/local-first>
 - <https://jaredforsyth.com>
 
@@ -84,9 +90,31 @@ String-wise sequence CRDT powering peer-to-peer collaborative editing in Teletyp
 
 ## Logux
 
+Logux has features inspired by CRDT to resolve edit conflicts between users. Real-time updates to prevent conflicts. Time travel to keep actions order the same on every client. A distributed timer to detect the latest changes.
+
 - <https://logux.io>
 - <https://github.com/logux/server>
 - <https://github.com/logux/client>
+
+## ShareDB
+
+ShareDB is a realtime database backend based on Operational Transformation (OT) of JSON documents. It is the realtime backend for the DerbyJS web application framework.
+
+- <https://github.com/share/sharedb>
+- <https://github.com/startupjs/startupjs>
+- <https://github.com/startupjs/startupjs/tree/master/packages/react-sharedb>
+
+Deprecated
+
+- <https://github.com/dmapper/react-sharedb>
+- <https://github.com/josephg/ShareJS>
+- <https://sharejs.org>
+
+## OT.js
+
+OT.js is not maintained anymore.
+
+- <https://github.com/Operational-Transformation/ot.js>
 
 ## Microsoft Fluid
 

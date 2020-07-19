@@ -69,7 +69,7 @@ Apache Cassandra
 - <https://medium.com/@srijancse/how-real-time-collaborative-editing-work-operational-transformation-ac4902d75682>
 - <https://hackernoon.com/operational-transformation-the-real-time-collaborative-editing-algorithm-bf8756683f66>
 
-Google Wave 
+Google Wave
 
 - <https://www.youtube.com/watch?v=uOFzWZrsPV0>
 - <https://www.youtube.com/watch?v=3ykZYKCK7AM>
@@ -93,6 +93,10 @@ TP2 Case
 Lessons Learned
 
 - <https://ckeditor.com/blog/Lessons-learned-from-creating-a-rich-text-editor-with-real-time-collaboration>
+
+Libraries for OT
+
+- <https://stackoverflow.com/questions/2043165/operational-transformation-library>
 
 ## Differential Synchronization
 
