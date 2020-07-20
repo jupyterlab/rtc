@@ -8,5 +8,13 @@
   },
   "include": [
     "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/rtc-node"
+    },
+    {
+      "path": "../../tools/rtc-debugger"
+    }
   ]
 }

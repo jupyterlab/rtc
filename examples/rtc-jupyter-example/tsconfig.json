@@ -8,5 +8,16 @@
   },
   "include": [
     "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/rtc-jupyter"
+    },
+    {
+      "path": "../../packages/rtc-node"
+    },
+    {
+      "path": "../../tools/rtc-debugger"
+    }
   ]
 }

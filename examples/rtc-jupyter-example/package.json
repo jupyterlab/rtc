@@ -14,7 +14,6 @@
     "rtc-debugger": "*",
     "rtc-jupyter": "*",
     "rtc-node": "*",
-    "rtc-relay": "*",
     "typescript": "3.9.6"
   },
   "scripts": {
