@@ -5,6 +5,7 @@ import {
   updateRecord,
   createRecord,
   withTransaction,
+  concatInitial,
 } from "rtc-node";
 import { schemas, DisplayType } from "rtc-jupyter";
 import * as jupyter from "rx-jupyter";
@@ -14,6 +15,7 @@ import * as commutable from "@nteract/commutable";
 // so we can use rx-jupyter in node
 // https://github.com/ReactiveX/rxjs/issues/2099#issuecomment-258033058
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 global.XMLHttpRequest = require("xhr2");
 const config = {
   endpoint: "http://127.0.0.1:8889/",
@@ -26,6 +28,7 @@ const fetchingContent = new Map<string, Subscription>();
 async function main(): Promise<void> {
   const url = process.env["RTC_RELAY_URL"] || "ws://localhost:8888";
   console.log(`Connecting to ${url}`);
+
   const datastore = await connect({
     schemas: Object.values(schemas),
     url,
@@ -33,7 +36,7 @@ async function main(): Promise<void> {
   }).toPromise();
   console.log(`Fetched initial transactions`);
 
-  records(datastore, schemas.contents).subscribe({
+  concatInitial(records(datastore, schemas.contents)).subscribe({
     next: (contents) =>
       contents
         // Find all content that needs to be fetched that we aren't fetching already
@@ -187,7 +190,7 @@ async function main(): Promise<void> {
   });
 }
 
-main();
+void main();
 
 function joinMultiline(s: string | Array<string>): string {
   if (typeof s == "string") {

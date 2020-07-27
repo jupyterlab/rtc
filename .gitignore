@@ -1,14 +1,30 @@
-node_modules
-yarn.lock
-.vscode
-.mypy_cache
-*.code-workspace
-yarn-error.log
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-packages/**/lib
-packages/**/build
-**/__pycache__
+# Exclude.
+.*
+_vendor*/*
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+build
+coverage
+dist
+lib
+__pycache__
+*.code-workspace
+*.ipynb
 *.profraw
 *.tsbuildinfo
-.ipynb_checkpoints
-*.ipynb
+*.egg-info
+
+# Include.
+!**/.*ignore
+!**/.*rc
+!**/.*rc.js
+!**/.*config
+!**/.env
+!**/.github
+!**/.readthedocs.yml
+!**/.storybook
