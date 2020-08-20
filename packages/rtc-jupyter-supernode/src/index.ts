@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   connect,
   records,
@@ -6,6 +5,7 @@ import {
   createRecord,
   withTransaction,
   concatInitial,
+  createPipeline,
 } from "rtc-node";
 import { schemas, DisplayType } from "rtc-jupyter";
 import * as jupyter from "rx-jupyter";
@@ -20,6 +20,11 @@ global.XMLHttpRequest = require("xhr2");
 const config = {
   endpoint: "http://127.0.0.1:8889/",
 };
+
+const pipeline = createPipeline(schemas, ({ get, create, update }) => {
+  return null as any;
+});
+
 /**
  * Mappping of IDs of content to the subscript for fetching them
  */

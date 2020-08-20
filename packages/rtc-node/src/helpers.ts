@@ -15,13 +15,15 @@ import { CollaborationClient } from "./client";
 import { signalToObservable } from "./util";
 import { ObservableWithInitial } from "./ObservableWithInitial";
 
-type SchemasObjectType = {
+export type SchemasObjectType = {
   [name: string]: {
     readonly [name: string]: AnyField;
   };
 };
 
-type SchemasListType<SCHEMAS extends SchemasObjectType> = {
+export type SchemasListType<
+  SCHEMAS extends SchemasObjectType = SchemasObjectType
+> = {
   [ID in keyof SCHEMAS]: {
     readonly id: ID;
     readonly fields: SCHEMAS[ID];

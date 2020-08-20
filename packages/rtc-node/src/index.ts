@@ -4,3 +4,4 @@
 export * from "./helpers";
 export * from "./react";
 export * from './ObservableWithInitial';
+export * from './pipelines';
