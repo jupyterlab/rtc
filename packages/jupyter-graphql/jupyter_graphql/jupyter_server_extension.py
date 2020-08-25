@@ -1,11 +1,31 @@
 import tornado
 import tornado.wsgi
 import ariadne.wsgi
+import ariadne.constants
+import typing
 from .schema import schema
+
+
+# https://github.com/prisma-labs/graphql-playground#properties
+NEW_PLAYGROUND_HTML = ariadne.constants.PLAYGROUND_HTML.replace(
+    "// options as 'endpoint' belong here",
+    "settings: {'request.credentials': 'include'}",
+)
+
+
+class GraphQL(ariadne.wsgi.GraphQL):
+    """
+    Change graphql playground to support passing xref to POST requsts
+    """
+
+    def handle_get(self, start_response) -> typing.List[bytes]:
+        super().handle_get(start_response)
+        return [NEW_PLAYGROUND_HTML.encode("utf-8")]
+
 
 # https://www.tornadoweb.org/en/stable/web.html#tornado.web.FallbackHandler
 # https://ariadnegraphql.org/docs/wsgi
-wsgi_app = tornado.wsgi.WSGIContainer(ariadne.wsgi.GraphQL(schema))
+wsgi_app = tornado.wsgi.WSGIContainer(GraphQL(schema))
 handlers = [
     (r".*", tornado.web.FallbackHandler, {"fallback": wsgi_app}),
 ]
