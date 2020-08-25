@@ -7,7 +7,7 @@ GraphQL powered Jupyter server, that exposes a stateful representation of the ex
 ```bash
 pip install flit
 flit install --symlink
-uvicorn jupyter_graphql:app
+uvicorn jupyter_graphql:app --reload
 # Open GraphQL inspector
 open http://127.0.0.1:8000/graphql/
 ```
