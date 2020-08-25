@@ -40,6 +40,7 @@ type PageInfo {
 
 type Query {
   node(id: ID!): Node
+  execution(id: ID!): Execution
 }
 
 type Execution implements Node {

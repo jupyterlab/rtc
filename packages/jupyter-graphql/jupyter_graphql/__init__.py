@@ -3,7 +3,7 @@ GraphQL server for Jupyter
 """
 
 
-from ariadne import load_schema_from_path, make_executable_schema, QueryType
+from ariadne import load_schema_from_path, make_executable_schema, QueryType, UnionType
 from ariadne.asgi import GraphQL
 import importlib.resources
 from starlette.applications import Starlette
@@ -15,15 +15,24 @@ with importlib.resources.path("jupyter_graphql", "schema.graphql") as path:
 
 query = QueryType()
 
-
-@query.field("hello")
-def resolve_hello(_, info):
-    request = info.context["request"]
-    user_agent = request.headers.get("user-agent", "guest")
-    return "Hello, %s!" % user_agent
+execution_status = UnionType("ExecutionStatus")
 
 
-schema = make_executable_schema(schema_str, query)
+@execution_status.type_resolver
+def resolve_execution_status(obj, *_):
+    return "ExecutionStatusOK"
+
+
+@query.field("execution")
+def resolve_node(_, info, id):
+    return {
+        "id": id,
+        "code": "some code",
+        "status": {"__typename": "ExecutionStatusOK",},
+    }
+
+
+schema = make_executable_schema(schema_str, [query, execution_status])
 
 app = Starlette(debug=True)
 app.mount("/graphql", GraphQL(schema, debug=True))
