@@ -9,7 +9,6 @@ services:
         - --dynamic-json
         - --no-setof-functions-contain-nulls
         - --no-ignore-rbac
-        - --no-ignore-indexes
         - --show-error-stack=json
         - --extended-errors=hint,detail,errcode
         - --append-plugins=@graphile-contrib/pg-simplify-inflector
@@ -19,6 +18,10 @@ services:
         - --allow-explain
         - --enable-query-batching
         - --legacy-relations=omit
+        - --live
+        - --classic-ids
+        - --simple-collections=omit
+        - --allow-explain
     volumes:
       - ./schemas:/tmp/schemas
    
