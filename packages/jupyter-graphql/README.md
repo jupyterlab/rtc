@@ -40,3 +40,8 @@ There are two other Python frameworks that fix issues 1 and 3, [adriadne](https:
 Tartiflatte wraps [`libgraphqlparser`](https://github.com/graphql/libgraphqlparser) and adriadne uses [`graphql-core`](https://github.com/graphql-python/graphql-core) version 3 (was called `graphql-core-next`).
 
 They look relatively similar, and for this project at least initially the idea will be to use adriadne, because it seems slightly more popular.
+
+
+## Schema Generation
+
+We are also [Postgraphile](https://www.graphile.org/postgraphile/) to generate some initial schemas. It is helping me understand how to move from a relational mapping to GraphQL queries and mutations. 

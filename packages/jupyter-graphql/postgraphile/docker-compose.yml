@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  postgraphile:
+    build: .
+    command:
+        - "--connection=postgres://user:pw@db:5432/default"
+        - --subscriptions
+        - --watch
+        - --dynamic-json
+        - --no-setof-functions-contain-nulls
+        - --no-ignore-rbac
+        - --no-ignore-indexes
+        - --show-error-stack=json
+        - --extended-errors=hint,detail,errcode
+        - --append-plugins=@graphile-contrib/pg-simplify-inflector
+        - --export-schema-graphql=/tmp/schemas/schema.graphql
+        - --graphiql="/"
+        - --enhance-graphiql
+        - --allow-explain
+        - --enable-query-batching
+        - --legacy-relations=omit
+    volumes:
+      - ./schemas:/tmp/schemas
+   
+    depends_on:
+      - db
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      POSTGRES_PASSWORD: pw
+      POSTGRES_USER: user
+      POSTGRES_DB: default
