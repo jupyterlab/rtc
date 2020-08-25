@@ -10,7 +10,7 @@ home-page = "https://github.com/jupyterlab/rtc"
 classifiers = ["License :: OSI Approved :: MIT License"]
 requires = [
     "ariadne",
-    "uvicorn"
+    "uvicorn[watchgodreload]"
 ]
 
 [tool.flit.metadata.requires-extra]
