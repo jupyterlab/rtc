@@ -38,6 +38,11 @@ type PageInfo {
   endCursor: Cursor
 }
 
+"""
+JSON serialized as a string.
+"""
+scalar JSON
+
 type Query {
   node(id: ID!): Node
   execution(id: ID!): Execution
@@ -47,13 +52,53 @@ type Execution implements Node {
   id: ID!
   code: String!
   status: ExecutionStatus!
+  displays: [Display!]!
 }
 
-union ExecutionStatus = ExecutionStatusOK | ExecutionStatusAbort
+union ExecutionStatus =
+    ExecutionStatusOK
+  | ExecutionStatusAbort
+  | ExecutionStatusError
+  | ExecutionStatusPending
 
 type ExecutionStatusOK {
-  n: String
+  executionCount: Int
+  result: ExecutionResult
 }
+
+type ExecutionResult {
+  data: JSON!
+  metadata: JSON!
+}
+
+type ExecutionStatusError {
+  name: String!
+  value: String!
+  traceback: [String!]!
+}
+
 type ExecutionStatusAbort {
-  n: String
+  _: Boolean
+}
+
+type ExecutionStatusPending {
+  _: Boolean
+}
+
+union Display = DisplayStream | DisplayData
+
+enum DisplayStreamName {
+  STDOUT
+  STDERR
+}
+
+type DisplayStream {
+  name: DisplayStreamName!
+  text: String!
+}
+
+type DisplayData {
+  data: JSON!
+  metadata: JSON!
+  displayID: String
 }
