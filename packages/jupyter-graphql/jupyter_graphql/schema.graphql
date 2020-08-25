@@ -9,6 +9,11 @@ interface Node {
 }
 
 """
+A location in a connection that can be used for resuming pagination.
+"""
+scalar Cursor
+
+"""
 Information about pagination in a connection.
 """
 type PageInfo {
