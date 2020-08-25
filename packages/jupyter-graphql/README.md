@@ -1,15 +1,15 @@
 # Jupyter GraphQL
 
-
 GraphQL powered Jupyter server, that exposes a stateful representation of the executions.
 
-
 ## Development
-
 
 ```bash
 pip install flit
 flit install --symlink
+uvicorn jupyter_graphql:app
+# Open GraphQL inspector
+open http://127.0.0.1:8000/graphql/
 ```
 
 ## Goals
@@ -36,12 +36,10 @@ There are a variety of existing Python GraphQL tools. The most popular is [Graph
 
 There are two other Python frameworks that fix issues 1 and 3, [adriadne](https://ariadnegraphql.org/) and [tartiflette](https://tartiflette.io/). See https://ariadnegraphql.org/docs/starlette-integration.html and https://florimond.dev/blog/articles/2019/07/introducing-tartiflette-starlette/.
 
-
 Tartiflatte wraps [`libgraphqlparser`](https://github.com/graphql/libgraphqlparser) and adriadne uses [`graphql-core`](https://github.com/graphql-python/graphql-core) version 3 (was called `graphql-core-next`).
 
 They look relatively similar, and for this project at least initially the idea will be to use adriadne, because it seems slightly more popular.
 
-
 ## Schema Generation
 
-We are also [Postgraphile](https://www.graphile.org/postgraphile/) to generate some initial schemas. It is helping me understand how to move from a relational mapping to GraphQL queries and mutations. 
+We are also [Postgraphile](https://www.graphile.org/postgraphile/) to generate some initial schemas. It is helping me understand how to move from a relational mapping to GraphQL queries and mutations.

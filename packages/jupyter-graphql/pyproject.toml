@@ -9,5 +9,12 @@ author-email = "s.shanabrook@gmail.com"
 home-page = "https://github.com/jupyterlab/rtc"
 classifiers = ["License :: OSI Approved :: MIT License"]
 requires = [
-    "graphene>=2.0"
+    "ariadne",
+    "uvicorn"
+]
+
+[tool.flit.metadata.requires-extra]
+dev = [
+    "mypy",
+    "black"
 ]
