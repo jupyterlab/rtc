@@ -10,11 +10,12 @@ home-page = "https://github.com/jupyterlab/rtc"
 classifiers = ["License :: OSI Approved :: MIT License"]
 requires = [
     "ariadne",
-    "uvicorn[watchgodreload]"
+    "jupyter_server"
+
 ]
 
 [tool.flit.metadata.requires-extra]
 dev = [
     "mypy",
-    "black"
+    "black",
 ]
