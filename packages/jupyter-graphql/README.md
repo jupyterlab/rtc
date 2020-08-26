@@ -8,10 +8,9 @@ GraphQL powered Jupyter server, that exposes a stateful representation of the ex
 pip install flit
 flit install --symlink
 # https://github.com/jupyter/jupyter_server/tree/master/examples/simple#extension-1
-uvicorn jupyter_graphql:app --reload
 jupyter server --ServerApp.jpserver_extensions="{'jupyter_graphql': True}" --ServerApp.tornado_settings="{'debug': True}"
 # Open GraphQL inspector
-open http://127.0.0.1:8000/graphql/
+open http://127.0.0.1:8888/graphql/
 ```
 
 ## Goals
