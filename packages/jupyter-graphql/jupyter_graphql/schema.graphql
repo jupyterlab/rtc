@@ -52,7 +52,22 @@ type Execution implements Node {
   id: ID!
   code: String!
   status: ExecutionStatus!
-  displays: [Display!]!
+  displays(
+    first: Int
+    last: Int
+    before: Cursor
+    after: Cursor
+  ): DisplaysConnection!
+}
+
+type DisplaysConnection {
+  edges: [DisplaysEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DisplaysEdge {
+  cursor: Cursor!
+  node: Display!
 }
 
 union ExecutionStatus =
@@ -67,6 +82,12 @@ type ExecutionStatusOK {
 }
 
 type ExecutionResult {
+  """
+  Data as JSON.
+  
+  We could represent as map, and add pagination, if we want to add support
+  for just getting some data or metadata, but not all of it.
+  """
   data: JSON!
   metadata: JSON!
 }

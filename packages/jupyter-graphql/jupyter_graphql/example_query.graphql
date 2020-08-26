@@ -1,0 +1,20 @@
+query {
+  execution(id: "hi") {
+    code
+    status {
+      __typename
+    }
+    displays(first: 10) {
+      pageInfo {
+        hasNextPage
+      }
+      edges {
+        node {
+          ... on DisplayData {
+            data
+          }
+        }
+      }
+    }
+  }
+}

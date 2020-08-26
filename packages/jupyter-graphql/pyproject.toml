@@ -18,4 +18,10 @@ requires = [
 dev = [
     "mypy",
     "black",
+    "pudb"
+]
+test = [
+    "pytest",
+    "pytest_tornasync",
+    "pytest_pudb"
 ]

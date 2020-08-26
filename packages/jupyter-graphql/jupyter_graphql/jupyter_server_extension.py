@@ -5,6 +5,8 @@ import ariadne.constants
 import typing
 import jupyter_server.serverapp
 from .schema import schema
+import json
+from .resources import EXAMPLE_QUERY_STR
 
 
 # Pass in other settings to graphql playground
@@ -21,12 +23,14 @@ settings: {
 },
 tabs: [{
     endpoint: '/graphl/',
-    query: '',
+    query: <QUERY>,
     headers: {
         "X-XSRFToken": document.cookie.match("\\b_xsrf=([^;]*)\\b")[1]
     }
 }]
-""".strip(),
+""".replace(
+        "<QUERY>", json.dumps(EXAMPLE_QUERY_STR)
+    ).strip(),
 )
 
 
@@ -46,7 +50,7 @@ def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp
     This function is called when the extension is loaded.
     """
     # https://github.com/bdarnell/django-tornado-demo/blob/master/testsite/tornado_main.py
-
+    # print(serverapp.web_app.settings)
     serverapp.web_app.add_handlers(
         r".*$",
         [
@@ -59,4 +63,3 @@ def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp
             ),
         ],
     )
-
