@@ -22,7 +22,7 @@ settings: {
     'editor.reuseHeaders': true,
 },
 tabs: [{
-    endpoint: '/graphl/',
+    endpoint: '/graphql/',
     query: <QUERY>,
     headers: {
         "X-XSRFToken": document.cookie.match("\\b_xsrf=([^;]*)\\b")[1]
@@ -55,7 +55,7 @@ def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp
         r".*$",
         [
             (
-                r".*",
+                r"/graphql/?",
                 tornado.web.FallbackHandler,
                 # https://www.tornadoweb.org/en/stable/web.html#tornado.web.FallbackHandler
                 # https://ariadnegraphql.org/docs/wsgi
