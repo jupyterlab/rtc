@@ -3,6 +3,7 @@ import tornado.wsgi
 import ariadne.wsgi
 import ariadne.constants
 import typing
+import jupyter_server.serverapp
 from .schema import schema
 
 
@@ -40,7 +41,7 @@ class GraphQL(ariadne.wsgi.GraphQL):
 
 
 # https://jupyter-server.readthedocs.io/en/latest/developers/extensions.html#distributing-a-server-extension
-def _load_jupyter_server_extension(serverapp):
+def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp):
     """
     This function is called when the extension is loaded.
     """
