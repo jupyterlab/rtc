@@ -43,3 +43,30 @@ jobs:
       - name: Test black format
         run: black --check
         working-directory: ./packages/jupyter-graphql
+  mypy:
+    name: Run MyPy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@master
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            pip-
+      - name: Install flit
+        run: |
+          python -m pip install --upgrade pip
+          pip install flit
+      - name: Install package
+        run: flit install
+        working-directory: ./packages/jupyter-graphql
+      - name: Run Mypy
+        run: mypy jupyter_graphql/
+        working-directory: ./packages/jupyter-graphql

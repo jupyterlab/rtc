@@ -17,6 +17,9 @@ open http://127.0.0.1:8888/graphql/
 
 # To run tests:
 pytest jupyter_graphql/
+
+# To check types:
+mypy jupyter_graphql/
 ```
 
 ## Goals
