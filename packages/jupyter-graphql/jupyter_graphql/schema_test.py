@@ -1,11 +1,16 @@
-import ariadne
+import pytest
+
 import graphql
 from .schema import *
 from .resources import *
 
 
-def test_schema_example():
+@pytest.fixture
+def schema(serverapp):
+    return create_schema(serverapp)
 
+
+def test_schema_example(schema):
     result = graphql.graphql_sync(schema, EXAMPLE_QUERY_STR)
     assert result.errors is None
     assert result.data == {

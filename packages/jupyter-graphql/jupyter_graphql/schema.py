@@ -1,53 +1,66 @@
+import dataclasses
+
+import ariadne
 import graphql
+import jupyter_server
 from ariadne import QueryType, load_schema_from_path, make_executable_schema
 from ariadne.objects import ObjectType
+from graphql.type.schema import GraphQLSchema
+
 from .resources import GRAPHQL_SCHEMA_PATH
+from .services import Services
 
-__all__ = ["schema"]
+__all__ = ["create_schema"]
 
-schema_str = load_schema_from_path(GRAPHQL_SCHEMA_PATH)
-
-query = QueryType()
-
-# execution_status = UnionType("ExecutionStatus")
+GRAPHQL_SCHEMA_STR = load_schema_from_path(str(GRAPHQL_SCHEMA_PATH))
 
 
-# @execution_status.type_resolver
-# def resolve_execution_status(obj, *_):
-#     return "ExecutionStatusOK"
+def create_schema(serverapp: jupyter_server.serverapp.ServerApp) -> GraphQLSchema:
+    """
+    Create a GraphQL schema with resolvers hooked up to the services
+    """
+    return SchemaFactory.from_server_app(serverapp).schema
 
 
-@query.field("execution")
-def resolve_node(_, info: graphql.GraphQLResolveInfo, id, **kwargs):
-    return {
-        "id": id,
-        "code": "some code",
-        "status": {"__typename": "ExecutionStatusPending",},
-        # "displays": [
-        #     {"__typename": "DisplayData", "data": "JSON!", "metadata": "JSON!"}
-        # ],
-    }
+@dataclasses.dataclass
+class SchemaFactory(Services):
+    """
+    Creates a schema using the services passed in as context.
 
+    Uses a class so that all resolvers can access the services.
+    """
 
-execution = ObjectType("Execution")
+    def __post_init__(self):
+        query = QueryType()
+        execution = ObjectType("Execution")
 
+        query.set_field("execution", self.resolve_execution)
+        execution.set_field("displays", self.resolve_displays)
+        self.schema = make_executable_schema(GRAPHQL_SCHEMA_STR, [query, execution])
 
-@execution.field("displays")
-def resolve_displays(context, info, first=None, last=None, before=None, after=None):
+    def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
+        return {
+            "id": id,
+            "code": "some code",
+            "status": {"__typename": "ExecutionStatusPending",},
+            # "displays": [
+            #     {"__typename": "DisplayData", "data": "JSON!", "metadata": "JSON!"}
+            # ],
+        }
 
-    return {
-        "pageInfo": {"hasNextPage": False},
-        "edges": [
-            {
-                "cursor": "hii",
-                "node": {
-                    "__typename": "DisplayData",
-                    "data": f"JSON! from {context['id']}",
-                    "metadata": "JSON!",
-                },
-            }
-        ],
-    }
-
-
-schema = make_executable_schema(schema_str, [query, execution])
+    def resolve_displays(
+        self, context, info, first=None, last=None, before=None, after=None
+    ):
+        return {
+            "pageInfo": {"hasNextPage": False},
+            "edges": [
+                {
+                    "cursor": "hii",
+                    "node": {
+                        "__typename": "DisplayData",
+                        "data": f"JSON! from {context['id']}",
+                        "metadata": "JSON!",
+                    },
+                }
+            ],
+        }

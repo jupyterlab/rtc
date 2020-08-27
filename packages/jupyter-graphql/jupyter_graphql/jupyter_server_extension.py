@@ -1,13 +1,14 @@
+import json
+import typing
+
+import ariadne.constants
+import ariadne.wsgi
+import jupyter_server.serverapp
 import tornado
 import tornado.wsgi
-import ariadne.wsgi
-import ariadne.constants
-import typing
-import jupyter_server.serverapp
-from .schema import schema
-import json
-from .resources import EXAMPLE_QUERY_STR
 
+from .resources import EXAMPLE_QUERY_STR
+from .schema import create_schema
 
 # Pass in other settings to graphql playground
 # https://github.com/prisma-labs/graphql-playground#properties
@@ -50,16 +51,19 @@ def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp
     This function is called when the extension is loaded.
     """
     # https://github.com/bdarnell/django-tornado-demo/blob/master/testsite/tornado_main.py
-    # print(serverapp.web_app.settings)
     serverapp.web_app.add_handlers(
         r".*$",
         [
             (
                 r"/graphql/?",
-                tornado.web.FallbackHandler,
+                tornado.web.FallbackHandler,  # type: ignore
                 # https://www.tornadoweb.org/en/stable/web.html#tornado.web.FallbackHandler
                 # https://ariadnegraphql.org/docs/wsgi
-                {"fallback": tornado.wsgi.WSGIContainer(GraphQL(schema))},
+                {
+                    "fallback": tornado.wsgi.WSGIContainer(
+                        GraphQL(create_schema(serverapp))
+                    )
+                },
             ),
         ],
     )
