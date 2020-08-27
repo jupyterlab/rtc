@@ -18,7 +18,8 @@ requires = [
 dev = [
     "mypy",
     "black",
-    "pudb"
+    "pudb",
+    "isort"
 ]
 test = [
     "pytest",
