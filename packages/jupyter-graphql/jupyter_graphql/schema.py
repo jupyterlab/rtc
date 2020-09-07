@@ -1,12 +1,13 @@
 import dataclasses
+import typing
 
 import graphql
+import jupyter_client.kernelspec
 import jupyter_server
 import jupyter_server.utils
 from ariadne import QueryType, load_schema_from_path, make_executable_schema
 from ariadne.objects import ObjectType
 from graphql.type.schema import GraphQLSchema
-import jupyter_client.kernelspec
 
 from .resources import GRAPHQL_SCHEMA_PATH
 from .services import Services
@@ -37,6 +38,7 @@ class SchemaFactory(Services):
         query.set_field("execution", self.resolve_execution)
         query.set_field("kernelspecs", self.resolve_kernelspecs)
         query.set_field("kernelspec", self.resolve_kernelspec)
+        query.set_field("kernelspecByID", self.resolve_kernelspec_by_id)
 
         execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
@@ -63,6 +65,12 @@ class SchemaFactory(Services):
             self.kernel_spec_manager.get_kernel_spec(name)
         )
         return serialize_kernelspec(name, spec.to_dict())
+
+    async def resolve_kernelspec_by_id(self, _, info, id):
+        tp, name = deserialize_id(id)
+        if tp != "kernelspec":
+            return None
+        return await self.resolve_kernelspec(_, info, name)
 
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
@@ -91,7 +99,7 @@ class SchemaFactory(Services):
 
 def serialize_kernelspec(name: str, spec: dict) -> dict:
     return {
-        "id": f"kernelspec:{name}",
+        "id": serialize_id("kernelspec", name),
         "argv": spec["argv"],
         "displayName": spec["display_name"],
         "language": spec["language"],
@@ -100,3 +108,14 @@ def serialize_kernelspec(name: str, spec: dict) -> dict:
         "metadata": spec.get("metadata", {}),
     }
 
+
+def serialize_id(type, id):
+    return f"{type}:{id}"
+
+
+def deserialize_id(id: str) -> typing.Tuple[str, str]:
+    """
+    Returns type and id
+    """
+    split = id.find(":")
+    return id[:split], id[split + 1 :]
