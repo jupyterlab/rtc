@@ -1,8 +1,8 @@
 import dataclasses
 
-import ariadne
 import graphql
 import jupyter_server
+import jupyter_server.utils
 from ariadne import QueryType, load_schema_from_path, make_executable_schema
 from ariadne.objects import ObjectType
 from graphql.type.schema import GraphQLSchema
@@ -22,6 +22,7 @@ def create_schema(serverapp: jupyter_server.serverapp.ServerApp) -> GraphQLSchem
     return SchemaFactory.from_server_app(serverapp).schema
 
 
+# TODO: don't inherit from services
 @dataclasses.dataclass
 class SchemaFactory(Services):
     """
@@ -32,20 +33,59 @@ class SchemaFactory(Services):
 
     def __post_init__(self):
         query = QueryType()
-        execution = ObjectType("Execution")
-
         query.set_field("execution", self.resolve_execution)
+        query.set_field("kernelspecs", self.resolve_kernelspecs)
+        query.set_field("kernelspec", self.resolve_kernelspec)
+
+        execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
-        self.schema = make_executable_schema(GRAPHQL_SCHEMA_STR, [query, execution])
+
+        kernel_spec = ObjectType("KernelSpec")
+        # kernel_spec.set_field("argv", self.resolve_kernelspec_argv)
+
+        self.schema = make_executable_schema(
+            GRAPHQL_SCHEMA_STR, [query, execution, kernel_spec]
+        )
+
+    # If we need a bunch of fields from a kernelspec, how to group them as one resolve?
+    # So that we only hit filesystem once?
+    async def resolve_kernelspecs(self, _, info):
+        specs = await jupyter_server.utils.ensure_async(
+            self.kernel_spec_manager.get_all_specs()
+        )
+        items = []
+        for name, spec in specs.items():
+            spec = spec["spec"]
+            items.append(
+                {
+                    "id": f"kernelspec:{name}",
+                    "argv": spec["argv"],
+                    "displayName": spec["display_name"],
+                    "language": spec["language"],
+                    "interruptMode": spec.get("interrupt_mode", "SIGNAL"),
+                    "env": spec.get("env", {}),
+                    "metadata": spec.get("metadata", {}),
+                }
+            )
+        return items
+
+    def resolve_kernelspec(self, _, info, id):
+        print(f"resolving kernelspec {id}")
+        return {
+            "id": id,
+            "argv": [],
+            "displayName": "df",
+            "language": "dsf",
+            "interruptMode": "SIGNAL",
+            "env": "{}",
+            "metadata": "{}",
+        }
 
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
             "id": id,
             "code": "some code",
             "status": {"__typename": "ExecutionStatusPending",},
-            # "displays": [
-            #     {"__typename": "DisplayData", "data": "JSON!", "metadata": "JSON!"}
-            # ],
         }
 
     def resolve_displays(

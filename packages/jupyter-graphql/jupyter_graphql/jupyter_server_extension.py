@@ -1,12 +1,11 @@
 import json
-import typing
 
+import ariadne.asgi
 import ariadne.constants
-import ariadne.wsgi
 import jupyter_server.serverapp
-import tornado
-import tornado.wsgi
+from jupyter_server import serverapp
 
+from .Ariadneapp import GraphQLHandler
 from .resources import EXAMPLE_QUERY_STR
 from .schema import create_schema
 
@@ -35,16 +34,6 @@ tabs: [{
 )
 
 
-class GraphQL(ariadne.wsgi.GraphQL):
-    """
-    Change graphql playground to support passing xref to POST requsts
-    """
-
-    def handle_get(self, start_response) -> typing.List[bytes]:
-        super().handle_get(start_response)
-        return [NEW_PLAYGROUND_HTML.encode("utf-8")]
-
-
 # https://jupyter-server.readthedocs.io/en/latest/developers/extensions.html#distributing-a-server-extension
 def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp):
     """
@@ -55,14 +44,11 @@ def _load_jupyter_server_extension(serverapp: jupyter_server.serverapp.ServerApp
         r".*$",
         [
             (
-                r"/graphql/?",
-                tornado.web.FallbackHandler,  # type: ignore
-                # https://www.tornadoweb.org/en/stable/web.html#tornado.web.FallbackHandler
-                # https://ariadnegraphql.org/docs/wsgi
+                f"/graphql/?",
+                GraphQLHandler,
                 {
-                    "fallback": tornado.wsgi.WSGIContainer(
-                        GraphQL(create_schema(serverapp))
-                    )
+                    "graphql_app": ariadne.asgi.GraphQL(create_schema(serverapp)),
+                    "playground_html": NEW_PLAYGROUND_HTML,
                 },
             ),
         ],

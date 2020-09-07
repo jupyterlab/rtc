@@ -18,7 +18,7 @@ SERVICES = typing.TypeVar("SERVICES", bound="Services")
 @dataclasses.dataclass
 class Services:
     """
-    Services provided by Jupyter Server that we need access to
+    Services provided by Jupyter Server that we need access to.
     """
 
     kernel_manager: jupyter_server.services.kernels.kernelmanager.MappingKernelManager
