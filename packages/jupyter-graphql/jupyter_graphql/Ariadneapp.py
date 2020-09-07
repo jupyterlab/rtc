@@ -15,10 +15,8 @@ import ariadne.constants
 import ariadne.exceptions
 import jupyter_server.base.handlers
 import tornado.escape
+import tornado.httputil
 import tornado.web
-from graphql.type import introspection
-from requests import status_codes
-from starlette.requests import Request
 
 
 class GraphQLHandler(jupyter_server.base.handlers.JupyterHandler):
@@ -54,7 +52,9 @@ class GraphQLHandler(jupyter_server.base.handlers.JupyterHandler):
         self.set_status(200 if success else 400)
         self.write(response)
 
-    async def extract_data_from_request(self, request: Request):
+    async def extract_data_from_request(
+        self, request: tornado.httputil.HTTPServerRequest
+    ):
         if request.headers.get("Content-Type") != ariadne.constants.DATA_TYPE_JSON:
             raise ariadne.exceptions.HttpBadRequestError(
                 "Posted content must be of type {}".format(
