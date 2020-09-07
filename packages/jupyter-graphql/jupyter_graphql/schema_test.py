@@ -1,8 +1,8 @@
+import graphql
 import pytest
 
-import graphql
-from .schema import *
 from .resources import *
+from .schema import *
 
 
 @pytest.fixture
