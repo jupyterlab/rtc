@@ -37,3 +37,17 @@ async def test_kernelspecs(schema):
 
     assert result.errors is None
     assert result.data == {"kernelspecs": [{"displayName": "Python 3"}]}
+
+
+async def test_get_kernelspec(schema):
+    result = await graphql.graphql(
+        schema,
+        """query {
+  kernelspec(name: "python3") {
+    displayName
+  }
+}""",
+    )
+
+    assert result.errors is None
+    assert result.data == {"kernelspec": {"displayName": "Python 3"}}

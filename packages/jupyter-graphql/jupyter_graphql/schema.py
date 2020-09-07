@@ -6,6 +6,7 @@ import jupyter_server.utils
 from ariadne import QueryType, load_schema_from_path, make_executable_schema
 from ariadne.objects import ObjectType
 from graphql.type.schema import GraphQLSchema
+import jupyter_client.kernelspec
 
 from .resources import GRAPHQL_SCHEMA_PATH
 from .services import Services
@@ -53,33 +54,15 @@ class SchemaFactory(Services):
         specs = await jupyter_server.utils.ensure_async(
             self.kernel_spec_manager.get_all_specs()
         )
-        items = []
-        for name, spec in specs.items():
-            spec = spec["spec"]
-            items.append(
-                {
-                    "id": f"kernelspec:{name}",
-                    "argv": spec["argv"],
-                    "displayName": spec["display_name"],
-                    "language": spec["language"],
-                    "interruptMode": spec.get("interrupt_mode", "SIGNAL"),
-                    "env": spec.get("env", {}),
-                    "metadata": spec.get("metadata", {}),
-                }
-            )
-        return items
+        return [
+            serialize_kernelspec(name, spec["spec"]) for name, spec in specs.items()
+        ]
 
-    def resolve_kernelspec(self, _, info, id):
-        print(f"resolving kernelspec {id}")
-        return {
-            "id": id,
-            "argv": [],
-            "displayName": "df",
-            "language": "dsf",
-            "interruptMode": "SIGNAL",
-            "env": "{}",
-            "metadata": "{}",
-        }
+    async def resolve_kernelspec(self, _, info, name):
+        spec: jupyter_client.kernelspec.KernelSpec = await jupyter_server.utils.ensure_async(
+            self.kernel_spec_manager.get_kernel_spec(name)
+        )
+        return serialize_kernelspec(name, spec.to_dict())
 
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
@@ -104,3 +87,16 @@ class SchemaFactory(Services):
                 }
             ],
         }
+
+
+def serialize_kernelspec(name: str, spec: dict) -> dict:
+    return {
+        "id": f"kernelspec:{name}",
+        "argv": spec["argv"],
+        "displayName": spec["display_name"],
+        "language": spec["language"],
+        "interruptMode": spec.get("interrupt_mode", "SIGNAL"),
+        "env": spec.get("env", {}),
+        "metadata": spec.get("metadata", {}),
+    }
+

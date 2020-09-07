@@ -53,6 +53,11 @@ type KernelSpec implements Node {
   id: ID!
 
   """
+  A unique kernel name.
+  """
+  name: String!
+
+  """
   A list of command line arguments used to start the kernel.
   The text `{connection_file}` in any argument will be replaced with the path to the connection file.
   """
@@ -96,7 +101,8 @@ enum KernelSpecInterruptMode {
 type Query {
   node(id: ID!): Node
   kernelspecs: [KernelSpec!]!
-  kernelspec(id: ID!): KernelSpec
+  kernelspec(name: String!): KernelSpec
+  kernelspecByID(id: ID!): KernelSpec
   execution(id: ID!): Execution
 }
 
