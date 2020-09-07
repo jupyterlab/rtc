@@ -10,8 +10,8 @@ def schema(serverapp):
     return create_schema(serverapp)
 
 
-def test_schema_example(schema):
-    result = graphql.graphql_sync(schema, EXAMPLE_QUERY_STR)
+async def test_schema_example(schema):
+    result = await graphql.graphql(schema, EXAMPLE_QUERY_STR)
     assert result.errors is None
     assert result.data == {
         "execution": {
@@ -23,3 +23,17 @@ def test_schema_example(schema):
             },
         }
     }
+
+
+async def test_kernelspecs(schema):
+    result = await graphql.graphql(
+        schema,
+        """query {
+  kernelspecs {
+    displayName
+  }
+}""",
+    )
+
+    assert result.errors is None
+    assert result.data == {"kernelspecs": [{"displayName": "Python 3"}]}
