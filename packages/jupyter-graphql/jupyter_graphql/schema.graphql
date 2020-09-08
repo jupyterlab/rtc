@@ -48,6 +48,8 @@ Kernel Specification.
 
 Provides all fields from KernelSpec file as defined in
 [Jupyter Client docs](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernelspecs).
+
+*TODO*: Add resources
 """
 type KernelSpec implements Node {
   id: ID!
