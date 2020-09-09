@@ -227,7 +227,7 @@ async def test_create_list_get_kernels(query):
                     id=kernel_id,
                 )
             )["kernelByID"]["executionState"]
-            == "STARTED"
+            != "STARTING"
         )
 
     await assert_eventually(is_started)
