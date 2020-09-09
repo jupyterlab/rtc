@@ -57,6 +57,9 @@ class SchemaFactory(Services):
         query.set_field("kernels", self.resolve_kernels)
         query.set_field("kernel", self.resolve_kernel)
         query.set_field("kernelByID", self.resolve_kernel_by_id)
+        mutation.set_field("stopKernel", self.resolve_stop_kernel)
+        mutation.set_field("interruptKernel", self.resolve_interrupt_kernel)
+        mutation.set_field("restartKernel", self.resolve_restart_kernel)
 
         execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
@@ -119,6 +122,33 @@ class SchemaFactory(Services):
     def resolve_kernel_by_id(self, _, info, id: str):
         return self.serialize_kernel(deserialize_id(id).name)
 
+    async def resolve_stop_kernel(self, _, info, input):
+        kernel_id = deserialize_id(input["id"]).name
+        await jupyter_server.utils.ensure_async(
+            self.kernel_manager.shutdown_kernel(kernel_id)
+        )
+        return {"clientMutationId": input["clientMutationId"], "id": input["id"]}
+
+    async def resolve_interrupt_kernel(self, _, info, input):
+        kernel_id = deserialize_id(input["id"]).name
+        await jupyter_server.utils.ensure_async(
+            self.kernel_manager.interrupt_kernel(kernel_id)
+        )
+        return {
+            "clientMutationId": input["clientMutationId"],
+            "kernel": self.serialize_kernel(kernel_id),
+        }
+
+    async def resolve_restart_kernel(self, _, info, input):
+        kernel_id = deserialize_id(input["id"]).name
+        await jupyter_server.utils.ensure_async(
+            self.kernel_manager.restart_kernel(kernel_id)
+        )
+        return {
+            "clientMutationId": input["clientMutationId"],
+            "kernel": self.serialize_kernel(kernel_id),
+        }
+
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
             "id": id,
@@ -152,7 +182,7 @@ class SchemaFactory(Services):
             "kernelID": kernel_id,
             "name": kernel.kernel_name,
             "lastActivity": jupyter_server._tz.isoformat(kernel.last_activity),
-            "exeuctionState": kernel.execution_state.upper(),
+            "executionState": kernel.execution_state.upper(),
             "connections": self.kernel_manager._kernel_connections[kernel_id],
         }
 

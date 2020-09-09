@@ -1,4 +1,7 @@
 import dataclasses
+import asyncio
+import typing
+import time
 
 import graphql
 import pytest
@@ -30,6 +33,22 @@ class QueryCaller:
 @pytest.fixture
 def query(schema):
     return QueryCaller(schema)
+
+
+async def assert_eventually(
+    condition: typing.Callable[[], typing.Awaitable[bool]], timeout=3.0
+) -> None:
+    """
+    Waits until the `condition` function returns true, failing if it doesn't after `timeout` seconds.
+
+
+    It repeatedly calls and awaits the `condition` function in a tight loop.
+    """
+    start_time = time.monotonic()
+    while (time.monotonic() - start_time) <= timeout:
+        if await condition():
+            return
+    raise RuntimeError(f"Timed out waiting for condition: {condition}")
 
 
 async def test_schema_example(query):
@@ -182,3 +201,67 @@ async def test_create_list_get_kernels(query):
 
     # test getting kernel by id
     assert results["kernelByID"]["id"] == id
+
+    # Test restarting kernel
+    assert (
+        await query(
+            """
+            mutation($id: ID!, $clientMutationId: String!) {
+                restartKernel(input: {
+                    clientMutationId: $clientMutationId,
+                    id: $id
+                }) {
+                    clientMutationId,
+                    kernel {
+                        kernelID,
+                        executionState
+                    }
+                }
+            }
+            """,
+            id=id,
+            clientMutationId=client_mutation_id,
+        )
+        == {
+            "restartKernel": {
+                "clientMutationId": client_mutation_id,
+                "kernel": {"kernelID": kernel_id, "executionState": "RESTARTING"},
+            }
+        }
+    )
+
+    # TODO: test interrupt
+
+    # Test deleting
+    assert (
+        await query(
+            """
+            mutation($id: ID!, $clientMutationId: String!) {
+                stopKernel(input: {
+                    clientMutationId: clientMutationId,
+                    id: id
+                }) {
+                    clientMutationId,
+                    id
+                }
+            }
+            """,
+            id=id,
+            clientMutationId=client_mutation_id,
+        )
+        == {"restartKernel": {"clientMutationId": client_mutation_id, "id": id}}
+    )
+
+    # Verify it's gone
+    assert (
+        await query(
+            """
+            query {
+                kernels {
+                    id
+                }
+            }
+            """
+        )
+        == {"kernels": []}
+    )
