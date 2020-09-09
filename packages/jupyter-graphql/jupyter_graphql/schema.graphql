@@ -90,6 +90,52 @@ type KernelSpec implements Node {
   metadata: JSON!
 }
 
+type Kernel implements Node {
+  id: ID!
+
+  """
+  ID of the kernel according to the server
+
+  TODO: Do we call this UUID or ID? mismatched terminology on jupyter server
+  https://jupyter-server.readthedocs.io/en/latest/developers/rest-api.html#get--api-kernels-kernel_id
+  """
+  kernelID: String!
+
+  name: String!
+
+  lastActivity: String!
+
+  executionState: KernelExecutionState!
+
+  connections: Int!
+}
+
+enum KernelExecutionState  {
+  """
+  Kernel is busy executing code
+  """
+  BUSY
+  """
+  Kernel is idle.
+  """
+  IDLE
+  """
+  Kernel is starting
+  """
+  STARTING
+
+  """
+  Kernel is in the middle of restarting
+  """
+  RESTARTING
+
+  """
+  Kernel tried to restart and failed.
+  TODO: What does the user do in this case? Try to restart again?
+  """
+  DEAD
+}
+
 """
 Specifies how a client is supposed to interrupt cell execution on this kernel.
 """
@@ -102,10 +148,122 @@ enum KernelSpecInterruptMode {
 
 type Query {
   node(id: ID!): Node
+
   kernelspecs: [KernelSpec!]!
   kernelspec(name: String!): KernelSpec
   kernelspecByID(id: ID!): KernelSpec
+
+  kernels: [Kernel!]!
+  kernel(kernelID: String!): Kernel
+  kernelByID(id: ID!): Kernel
+
   execution(id: ID!): Execution
+}
+
+type Mutation {
+  """
+  Start a new kernel.
+
+  TODO: Should possibly rename create and delete instead?
+  """
+  startKernel(input: StartKernelInput!): StartKernelPayload
+  """
+  Shutdown and delete a kernel.
+  """
+  stopKernel(input: StopKernelInput!): StopKernelPayload
+  """
+  Interrupt a kernel.
+  """
+  interruptKernel(input: InterruptKernelInput!): InterruptKernelPayload
+  """
+  Restart a kernel.
+  """
+  restartKernel(input: RestartKernelInput!): RestartKernelPayload
+}
+
+
+input StartKernelInput {
+  clientMutationId: String!
+
+  """
+  Kernel spec name (defaults to default kernel spec for server)
+
+  # TODO: Should this be a kernel spec ID instead of a name?
+  """
+  kernelspecName: String
+
+  """
+  API path from root to the cwd of the kernel
+  """
+  path: String
+}
+
+type StartKernelPayload {
+  clientMutationId: String!
+
+  """
+  The kernel that was started
+  """
+  kernel: Kernel!
+}
+
+
+"""
+TODO: We should probably make this just trigger a interrupt message/kill the kernel
+based on the kernelspec?
+
+Or should we allow people to kill as well manually or send interrupt message manually?
+"""
+input StopKernelInput {
+  clientMutationId: String!
+
+  """
+  The ID of the kernel to stop
+  """
+  id: ID!
+}
+
+type StopKernelPayload {
+  clientMutationId: String!
+  """
+  The kernel that was triggered to stop. Note that this may take some time and happen after this mutation returns.
+  """
+  kernel: Kernel!
+}
+
+
+input InterruptKernelInput {
+  clientMutationId: String!
+
+  """
+  The ID of the kernel to interrupt
+  """
+  id: ID!
+}
+
+type InterruptKernelPayload {
+  clientMutationId: String!
+  """
+  The kernel that was interrupted
+  """
+  kernel: Kernel!
+}
+
+input RestartKernelInput {
+  clientMutationId: String!
+
+  """
+  The ID of the kernel to restart
+  """
+  id: ID!
+}
+
+type RestartKernelPayload {
+  clientMutationId: String!
+  """
+  The kernel that was restarted
+  """
+  kernel: Kernel!
 }
 
 type Execution implements Node {

@@ -110,3 +110,59 @@ async def test_get_kernelspec_by_id(query):
         )
         == {"kernelspecByID": {"displayName": kernelspec_display_name}}
     )
+
+
+async def test_create_list_kernels(query):
+    assert (
+        await query(
+            """
+            query {
+                kernels {
+                    id
+                }
+            }
+            """
+        )
+        == {"kernels": []}
+    )
+
+    client_mutation_id = "some id!"
+    start_kernel_payload = (
+        await query(
+            """
+            mutation($clientMutationId: String!) {
+                startKernel(input: {
+                    clientMutationId: $clientMutationId
+                }) {
+                    clientMutationId,
+                    kernel {
+                        id,
+                        kernelID,
+                        name
+                    }
+                }
+            }
+            """,
+            clientMutationId=client_mutation_id,
+        )
+    )["startKernel"]
+    assert start_kernel_payload["clientMutationId"] == client_mutation_id
+
+    kernels = (
+        await query(
+            """
+            query {
+                kernels {
+                    id,
+                    kernelID,
+                    name
+                }
+            }
+            """
+        )
+    )["kernels"]
+    assert len(kernels) == 1
+
+    assert kernels[0]["id"] == start_kernel_payload["kernel"]["id"]
+    assert kernels[0]["kernelID"] == start_kernel_payload["kernel"]["kernelID"]
+    assert kernels[0]["name"] == start_kernel_payload["kernel"]["name"]
