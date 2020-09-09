@@ -154,6 +154,11 @@ type Query {
   kernelspecByID(id: ID!): KernelSpec
 
   kernels: [Kernel!]!
+  """
+  Maybe in future we should just remove this `kernelByID` and make that the default? Only allow opaque IDs to look up kernels?
+
+  Ideally would allow union type as input, to allow either ID or kernel_id to query...
+  """
   kernel(kernelID: String!): Kernel
   kernelByID(id: ID!): Kernel
 

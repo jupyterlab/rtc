@@ -71,6 +71,9 @@ class SchemaFactory(Services):
             GRAPHQL_SCHEMA_STR, [query, mutation, execution]
         )
 
+        # Save factory on self, so we can access it for debugging when we just have access to schema
+        self.schema.__factory__ = self  # type: ignore
+
     # If we need a bunch of fields from a kernelspec, how to group them as one resolve?
     # So that we only hit filesystem once?
     async def resolve_kernelspecs(self, _, info):

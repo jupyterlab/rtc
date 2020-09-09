@@ -1,7 +1,7 @@
-import dataclasses
 import asyncio
-import typing
+import dataclasses
 import time
+import typing
 
 import graphql
 import pytest
@@ -36,19 +36,29 @@ def query(schema):
 
 
 async def assert_eventually(
-    condition: typing.Callable[[], typing.Awaitable[bool]], timeout=3.0
+    callback: typing.Callable[[], typing.Awaitable[None]], timeout=10.0, wait=0.1
 ) -> None:
     """
-    Waits until the `condition` function returns true, failing if it doesn't after `timeout` seconds.
+    Waits until the `callback` function doesn't raise an exception, failing if it doesn't after `timeout` seconds.
 
 
     It repeatedly calls and awaits the `condition` function in a tight loop.
     """
     start_time = time.monotonic()
-    while (time.monotonic() - start_time) <= timeout:
-        if await condition():
+    n = 0
+    while True:
+        try:
+            await callback()
+        except Exception:
+            n += 1
+            elapsed_time = time.monotonic() - start_time
+            if elapsed_time > timeout:
+                raise AssertionError(
+                    f"{callback} did not succeed after {timeout} seconds, failing {n} times."
+                )
+            await asyncio.sleep(wait)
+        else:
             return
-    raise RuntimeError(f"Timed out waiting for condition: {condition}")
 
 
 async def test_schema_example(query):
@@ -201,6 +211,26 @@ async def test_create_list_get_kernels(query):
 
     # test getting kernel by id
     assert results["kernelByID"]["id"] == id
+
+    # Wait for it to be startedd
+    async def is_started() -> None:
+        assert (
+            (
+                await query(
+                    """
+                    query($id: ID!) {
+                        kernelByID(id: $id) {
+                            executionState
+                        }
+                    }
+                    """,
+                    id=kernel_id,
+                )
+            )["kernelByID"]["executionState"]
+            == "STARTED"
+        )
+
+    await assert_eventually(is_started)
 
     # Test restarting kernel
     assert (
