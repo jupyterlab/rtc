@@ -1,3 +1,11 @@
+"""
+We should refactor this at some point to:
+
+1. At least modularize into different subfolders for different parts of server
+2. Try to create well typed interfaces based on graphql using codegen, so it can be verified with mypy
+3. Split out core logic interacting with jupyter server from graphql endpoints part. Extract that out into `models.py` maybe.
+"""
+
 import dataclasses
 import typing
 
@@ -47,6 +55,8 @@ class SchemaFactory(Services):
 
         mutation.set_field("startKernel", self.resolve_start_kernel)
         query.set_field("kernels", self.resolve_kernels)
+        query.set_field("kernel", self.resolve_kernel)
+        query.set_field("kernelByID", self.resolve_kernel_by_id)
 
         execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
@@ -103,6 +113,12 @@ class SchemaFactory(Services):
             )
         ]
 
+    def resolve_kernel(self, _, info, kernelID: str):
+        return self.serialize_kernel(kernelID)
+
+    def resolve_kernel_by_id(self, _, info, id: str):
+        return self.serialize_kernel(deserialize_id(id).name)
+
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
             "id": id,
@@ -157,9 +173,11 @@ def serialize_id(type, id):
     return f"{type}:{id}"
 
 
-def deserialize_id(id: str) -> typing.Tuple[str, str]:
-    """
-    Returns type and id
-    """
+class TypeAndName(typing.NamedTuple):
+    type: str
+    name: str
+
+
+def deserialize_id(id: str) -> TypeAndName:
     split = id.find(":")
-    return id[:split], id[split + 1 :]
+    return TypeAndName(id[:split], id[split + 1 :])

@@ -112,7 +112,7 @@ async def test_get_kernelspec_by_id(query):
     )
 
 
-async def test_create_list_kernels(query):
+async def test_create_list_get_kernels(query):
     assert (
         await query(
             """
@@ -148,21 +148,37 @@ async def test_create_list_kernels(query):
     )["startKernel"]
     assert start_kernel_payload["clientMutationId"] == client_mutation_id
 
-    kernels = (
-        await query(
-            """
-            query {
-                kernels {
-                    id,
-                    kernelID,
-                    name
-                }
+    id = start_kernel_payload["kernel"]["id"]
+    kernel_id = start_kernel_payload["kernel"]["kernelID"]
+    results = await query(
+        """
+        query($id: ID!, $kernelID: String!) {
+            kernels {
+                id,
+                kernelID,
+                name
             }
-            """
-        )
-    )["kernels"]
-    assert len(kernels) == 1
+            kernel(kernelID: $kernelID) {
+                id
+            }
+            kernelByID(id: $id) {
+                id
+            }
 
-    assert kernels[0]["id"] == start_kernel_payload["kernel"]["id"]
-    assert kernels[0]["kernelID"] == start_kernel_payload["kernel"]["kernelID"]
-    assert kernels[0]["name"] == start_kernel_payload["kernel"]["name"]
+        }
+        """,
+        id=id,
+        kernelID=kernel_id,
+    )
+
+    # Test listing kernels
+    assert len(results["kernels"]) == 1
+    assert results["kernels"][0]["id"] == id
+    assert results["kernels"][0]["kernelID"] == kernel_id
+    assert results["kernels"][0]["name"] == start_kernel_payload["kernel"]["name"]
+
+    # test getting kernel
+    assert results["kernel"]["id"] == id
+
+    # test getting kernel by id
+    assert results["kernelByID"]["id"] == id
