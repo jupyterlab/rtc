@@ -212,25 +212,10 @@ async def test_create_list_get_kernels(query):
     # test getting kernel by id
     assert results["kernelByID"]["id"] == id
 
-    # Wait for it to be startedd
-    async def is_started() -> None:
-        assert (
-            (
-                await query(
-                    """
-                    query($id: ID!) {
-                        kernelByID(id: $id) {
-                            executionState
-                        }
-                    }
-                    """,
-                    id=kernel_id,
-                )
-            )["kernelByID"]["executionState"]
-            != "STARTING"
-        )
 
-    await assert_eventually(is_started)
+    # TODO: should probably wait till idle
+    # if this is resolved https://github.com/jupyter/jupyter_server/issues/305
+    # await assert_eventually(is_idle)
 
     # Test restarting kernel
     assert (
@@ -255,10 +240,50 @@ async def test_create_list_get_kernels(query):
         == {
             "restartKernel": {
                 "clientMutationId": client_mutation_id,
-                "kernel": {"kernelID": kernel_id, "executionState": "RESTARTING"},
+                "kernel": {"kernelID": kernel_id, "executionState": "STARTING"},
             }
         }
     )
+
+    # Wait for it to be startedd
+    async def is_restarting() -> None:
+        assert (
+            (
+                await query(
+                    """
+                    query($id: ID!) {
+                        kernelByID(id: $id) {
+                            executionState
+                        }
+                    }
+                    """,
+                    id=kernel_id,
+                )
+            )["kernelByID"]["executionState"]
+            == "RESTARTING"
+        )
+
+    async def is_idle() -> None:
+        assert (
+            (
+                await query(
+                    """
+                    query($id: ID!) {
+                        kernelByID(id: $id) {
+                            executionState
+                        }
+                    }
+                    """,
+                    id=kernel_id,
+                )
+            )["kernelByID"]["executionState"]
+            == "IDLE"
+        )
+
+    # Should wait for restarting once this is resolved
+    # https://github.com/jupyter/jupyter_client/issues/578
+    # await assert_eventually(is_restarting)
+    await assert_eventually(is_idle)
 
     # TODO: test interrupt
 
@@ -268,8 +293,8 @@ async def test_create_list_get_kernels(query):
             """
             mutation($id: ID!, $clientMutationId: String!) {
                 stopKernel(input: {
-                    clientMutationId: clientMutationId,
-                    id: id
+                    clientMutationId: $clientMutationId,
+                    id: $id
                 }) {
                     clientMutationId,
                     id
@@ -279,7 +304,7 @@ async def test_create_list_get_kernels(query):
             id=id,
             clientMutationId=client_mutation_id,
         )
-        == {"restartKernel": {"clientMutationId": client_mutation_id, "id": id}}
+        == {"stopKernel": {"clientMutationId": client_mutation_id, "id": id}}
     )
 
     # Verify it's gone

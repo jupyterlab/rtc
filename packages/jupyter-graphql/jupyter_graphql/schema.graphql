@@ -170,6 +170,9 @@ type Mutation {
   Start a new kernel.
 
   TODO: Should possibly rename create and delete instead?
+
+  TODO: Why should start not send a `kernel_info_request`
+  but restarting does? Is this the desired behavior? Is this documented somewhere?
   """
   startKernel(input: StartKernelInput!): StartKernelPayload
   """
@@ -231,9 +234,9 @@ input StopKernelInput {
 type StopKernelPayload {
   clientMutationId: String!
   """
-  The kernel that was triggered to stop. Note that this may take some time and happen after this mutation returns.
+  The kernel ID that was triggered to stop.
   """
-  kernel: Kernel!
+  id: ID!
 }
 
 
