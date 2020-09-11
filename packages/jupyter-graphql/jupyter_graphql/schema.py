@@ -7,6 +7,7 @@ We should refactor this at some point to:
 """
 
 import dataclasses
+from sys import executable
 import typing
 
 import ariadne
@@ -44,15 +45,19 @@ class SchemaFactory(Services):
     """
 
     def __post_init__(self):
+        super().__post_init__()
         query = QueryType()
         mutation = ariadne.MutationType()
+        subscription = ariadne.SubscriptionType()
 
         query.set_field("execution", self.resolve_execution)
 
+        # kernelspecs
         query.set_field("kernelspecs", self.resolve_kernelspecs)
         query.set_field("kernelspec", self.resolve_kernelspec)
         query.set_field("kernelspecByID", self.resolve_kernelspec_by_id)
 
+        # Kernels
         mutation.set_field("startKernel", self.resolve_start_kernel)
         query.set_field("kernels", self.resolve_kernels)
         query.set_field("kernel", self.resolve_kernel)
@@ -60,6 +65,23 @@ class SchemaFactory(Services):
         mutation.set_field("stopKernel", self.resolve_stop_kernel)
         mutation.set_field("interruptKernel", self.resolve_interrupt_kernel)
         mutation.set_field("restartKernel", self.resolve_restart_kernel)
+        subscription.set_field(
+            "kernelExecutionStateUpdated", self.resolve_kernel_execution_state_updated
+        )
+        subscription.set_source(
+            "kernelExecutionStateUpdated",
+            self.kernel_execution_state_generator,
+        )
+        subscription.set_field("kernelCreated", self.resolve_kernel_created)
+        subscription.set_source(
+            "kernelCreated",
+            self.kernel_created_generator,
+        )
+        subscription.set_field("kernelDeleted", self.resolve_kernel_deleted)
+        subscription.set_source(
+            "kernelDeleted",
+            self.kernel_deleted_generator,
+        )
 
         execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
@@ -68,7 +90,7 @@ class SchemaFactory(Services):
         # kernel_spec.set_field("argv", self.resolve_kernelspec_argv)
 
         self.schema = make_executable_schema(
-            GRAPHQL_SCHEMA_STR, [query, mutation, execution]
+            GRAPHQL_SCHEMA_STR, [query, mutation, subscription, execution]
         )
 
         # Save factory on self, so we can access it for debugging when we just have access to schema
@@ -152,12 +174,43 @@ class SchemaFactory(Services):
             "kernel": self.serialize_kernel(kernel_id),
         }
 
+    def resolve_kernel_execution_state_updated(self, execution_state, info, id: str):
+        kernel_id = deserialize_id(id).name
+        return self.serialize_kernel(kernel_id, execution_state=execution_state)
+
+    async def kernel_execution_state_generator(self, obj, info, id: str):
+        kernel_id = deserialize_id(id).name
+        # kernel is already deleted
+        if kernel_id not in self.kernel_execution_state_updated:
+            return
+        with self.kernel_execution_state_updated[
+            kernel_id
+        ].subscribe() as execution_states:
+            async for execution_state in execution_states:
+                yield execution_state
+
+    def resolve_kernel_created(self, kernel_id, info):
+        return self.serialize_kernel(kernel_id)
+
+    async def kernel_created_generator(self, obj, info):
+        with self.kernel_added.subscribe() as kernel_ids:
+            async for kernel_id in kernel_ids:
+                yield kernel_id
+
+    def resolve_kernel_deleted(self, kernel_id, info):
+        return serialize_id("kernel", kernel_id)
+
+    async def kernel_deleted_generator(self, obj, info):
+        with self.kernel_deleted.subscribe() as kernel_ids:
+            async for kernel_id in kernel_ids:
+                yield kernel_id
+
     def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
         return {
             "id": id,
             "code": "some code",
             "status": {
-                "__typename": "ExecutionStatusPending",
+                "__typename": "ExecutionStatePending",
             },
         }
 
@@ -178,14 +231,14 @@ class SchemaFactory(Services):
             ],
         }
 
-    def serialize_kernel(self, kernel_id):
+    def serialize_kernel(self, kernel_id, execution_state=None):
         kernel = self.kernel_manager._kernels[kernel_id]
         return {
             "id": serialize_id("kernel", kernel_id),
             "kernelID": kernel_id,
             "name": kernel.kernel_name,
             "lastActivity": jupyter_server._tz.isoformat(kernel.last_activity),
-            "executionState": kernel.execution_state.upper(),
+            "executionState": (execution_state or kernel.execution_state).upper(),
             "connections": self.kernel_manager._kernel_connections[kernel_id],
         }
 

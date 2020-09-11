@@ -2,13 +2,17 @@ import asyncio
 import dataclasses
 import time
 import typing
+from typing import AsyncGenerator
+import ariadne
 
 import graphql
+from graphql.execution.execute import ExecutionResult
 import pytest
-from graphql.type.schema import GraphQLSchema
+import graphql.type.schema
 
 from .resources import *
 from .schema import *
+from .stopped import *
 
 
 @pytest.fixture
@@ -18,7 +22,7 @@ def schema(serverapp):
 
 @dataclasses.dataclass
 class QueryCaller:
-    schema: GraphQLSchema
+    schema: graphql.type.schema.GraphQLSchema
 
     async def __call__(self, query: str, expect_error=False, **variables):
         result = await graphql.graphql(self.schema, query, variable_values=variables)
@@ -30,17 +34,40 @@ class QueryCaller:
         return result.data
 
 
+async def assert_results(results: typing.AsyncIterable[graphql.ExecutionResult]):
+    async for res in results:
+        assert not res.errors
+        yield res.data
+
+
+@dataclasses.dataclass
+class SubscribeCaller:
+    schema: graphql.type.schema.GraphQLSchema
+
+    async def __call__(self, query: str, expect_error=False, **variables):
+        success, result = await ariadne.subscribe(
+            self.schema, {"query": query, "variables": variables}
+        )
+        assert success
+        assert not isinstance(result, list)
+        return assert_results(result)
+
+
 @pytest.fixture
 def query(schema):
     return QueryCaller(schema)
 
 
+@pytest.fixture
+def subscribe(schema):
+    return SubscribeCaller(schema)
+
+
 async def assert_eventually(
-    callback: typing.Callable[[], typing.Awaitable[None]], timeout=10.0, wait=0.1
+    callback: typing.Callable[[], typing.Awaitable[None]], timeout=5.0, wait=0.1
 ) -> None:
     """
     Waits until the `callback` function doesn't raise an exception, failing if it doesn't after `timeout` seconds.
-
 
     It repeatedly calls and awaits the `condition` function in a tight loop.
     """
@@ -65,7 +92,7 @@ async def test_schema_example(query):
     assert await query(EXAMPLE_QUERY_STR) == {
         "execution": {
             "code": "some code",
-            "status": {"__typename": "ExecutionStatusPending"},
+            "status": {"__typename": "ExecutionStatePending"},
             "displays": {
                 "pageInfo": {"hasNextPage": False},
                 "edges": [{"node": {"data": "JSON! from hi"}}],
@@ -141,7 +168,7 @@ async def test_get_kernelspec_by_id(query):
     )
 
 
-async def test_create_list_get_kernels(query):
+async def test_kernels_mutations(query):
     assert (
         await query(
             """
@@ -211,7 +238,6 @@ async def test_create_list_get_kernels(query):
 
     # test getting kernel by id
     assert results["kernelByID"]["id"] == id
-
 
     # TODO: should probably wait till idle
     # if this is resolved https://github.com/jupyter/jupyter_server/issues/305
@@ -320,3 +346,146 @@ async def test_create_list_get_kernels(query):
         )
         == {"kernels": []}
     )
+
+
+T = typing.TypeVar("T")
+V = typing.TypeVar("V")
+
+
+async def collect_async_iterable(
+    iterable: typing.AsyncIterable[T],
+    mapping_fn: typing.Callable[[T], V],
+    items: typing.List[typing.Union[V, Stopped]],
+    started: asyncio.Event,
+) -> None:
+    started.set()
+    async for item in iterable:
+        items.append(mapping_fn(item))
+    items.append(_stopped)
+
+
+async def async_iterable_to_list(
+    iterable: typing.AsyncIterable[T],
+    mapping_fn: typing.Callable[[T], V],
+) -> typing.List[typing.Union[V, Stopped]]:
+    """
+    Turns an async iterable into a list that is updated in another coroutine.
+
+    Waits for that coroutine to start before returnign
+    """
+    items: typing.List[typing.Union[V, Stopped]] = []
+    started = asyncio.Event()
+    asyncio.create_task(
+        collect_async_iterable(
+            iterable,
+            mapping_fn,
+            items,
+            started,
+        )
+    )
+    await started.wait()
+    return items
+
+
+async def test_kernels_subscriptions(query, subscribe):
+    kernel_created_ids = await async_iterable_to_list(
+        await subscribe("subscription { kernelCreated { id } }"),
+        lambda r: r["kernelCreated"]["id"],
+    )
+    kernel_deleted_ids = await async_iterable_to_list(
+        await subscribe("subscription { kernelDeleted }"),
+        lambda r: r["kernelDeleted"],
+    )
+
+    assert kernel_created_ids == []
+    assert kernel_deleted_ids == []
+    id = (
+        await query(
+            """
+            mutation($clientMutationId: String!) {
+                startKernel(input: {
+                    clientMutationId: $clientMutationId
+                }) {
+                    kernel {
+                        id
+                    }
+                }
+            }
+            """,
+            clientMutationId="some id",
+        )
+    )["startKernel"]["kernel"]["id"]
+
+    kernel_execution_states = await async_iterable_to_list(
+        await subscribe(
+            "subscription($id: ID!) { kernelExecutionStateUpdated(id: $id) { executionState } }",
+            id=id,
+        ),
+        lambda r: r["kernelExecutionStateUpdated"]["executionState"],
+    )
+
+    assert kernel_execution_states == []
+
+    async def assert_kernel_created():
+        assert kernel_created_ids == [id]
+
+    async def assert_kernel_status_starting():
+        # Sometimes we capture starting, sometimes not, non deterministic
+        assert (kernel_execution_states == ["STARTING"])
+
+    # Verify that kernel was started
+    await assert_eventually(assert_kernel_created)
+
+    assert kernel_deleted_ids == []
+    # await assert_eventually(assert_kernel_status_starting)
+
+    # Try restating and verify statuses update
+
+    await query(
+        """
+        mutation($id: ID!, $clientMutationId: String!) {
+            restartKernel(input: {
+                clientMutationId: $clientMutationId,
+                id: $id
+            }) {
+                clientMutationId
+            }
+        }
+        """,
+        clientMutationId="some id",
+        id=id,
+    )
+
+    async def assert_kernel_statuses_busy_idle():
+        # Sometimes we capture starting, sometimes not, non deterministic
+        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE"]) or (kernel_execution_states == ["BUSY", "IDLE"])
+
+    await assert_kernel_created()
+    assert kernel_deleted_ids == []
+    await assert_eventually(assert_kernel_statuses_busy_idle)
+
+    # Now stop and verify it is at stopped
+    await query(
+        """
+        mutation($id: ID!, $clientMutationId: String!) {
+            stopKernel(input: {
+                clientMutationId: $clientMutationId,
+                id: $id
+            }) {
+                clientMutationId
+            }
+        }
+        """,
+        id=id,
+        clientMutationId="some id",
+    )
+
+    async def assert_kernel_stopped():
+        assert kernel_deleted_ids == [id]
+
+    async def assert_kernel_statuses_stopped():
+        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE", _stopped] or kernel_execution_states == ["BUSY", "IDLE", _stopped])
+
+    await assert_eventually(assert_kernel_stopped)
+    await assert_eventually(assert_kernel_statuses_stopped)
+    await assert_kernel_created()

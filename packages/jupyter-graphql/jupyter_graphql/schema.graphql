@@ -110,7 +110,7 @@ type Kernel implements Node {
   connections: Int!
 }
 
-enum KernelExecutionState  {
+enum KernelExecutionState {
   """
   Kernel is busy executing code
   """
@@ -158,6 +158,8 @@ type Query {
   Maybe in future we should just remove this `kernelByID` and make that the default? Only allow opaque IDs to look up kernels?
 
   Ideally would allow union type as input, to allow either ID or kernel_id to query...
+
+  TODO: Should we send kernel info request to make sure this stuff is up to date like execution_state?
   """
   kernel(kernelID: String!): Kernel
   kernelByID(id: ID!): Kernel
@@ -189,6 +191,20 @@ type Mutation {
   restartKernel(input: RestartKernelInput!): RestartKernelPayload
 }
 
+type Subscription {
+  """
+  Triggers whenever a kernel status is updated and completes when it is deleted.
+  """
+  kernelExecutionStateUpdated(id: ID!): Kernel
+  """
+  Triggers whenever a new kernel is created.
+  """
+  kernelCreated: Kernel!
+  """
+  Triggers whenever a kernel is deleted.
+  """
+  kernelDeleted: ID!
+}
 
 input StartKernelInput {
   clientMutationId: String!
@@ -215,7 +231,6 @@ type StartKernelPayload {
   kernel: Kernel!
 }
 
-
 """
 TODO: We should probably make this just trigger a interrupt message/kill the kernel
 based on the kernelspec?
@@ -238,7 +253,6 @@ type StopKernelPayload {
   """
   id: ID!
 }
-
 
 input InterruptKernelInput {
   clientMutationId: String!
@@ -277,7 +291,7 @@ type RestartKernelPayload {
 type Execution implements Node {
   id: ID!
   code: String!
-  status: ExecutionStatus!
+  status: ExecutionState!
   displays(
     first: Int
     last: Int
@@ -296,13 +310,13 @@ type DisplaysEdge {
   node: Display!
 }
 
-union ExecutionStatus =
-    ExecutionStatusOK
-  | ExecutionStatusAbort
-  | ExecutionStatusError
-  | ExecutionStatusPending
+union ExecutionState =
+    ExecutionStateOK
+  | ExecutionStateAbort
+  | ExecutionStateError
+  | ExecutionStatePending
 
-type ExecutionStatusOK {
+type ExecutionStateOK {
   executionCount: Int
   result: ExecutionResult
 }
@@ -318,17 +332,17 @@ type ExecutionResult {
   metadata: JSON!
 }
 
-type ExecutionStatusError {
+type ExecutionStateError {
   name: String!
   value: String!
   traceback: [String!]!
 }
 
-type ExecutionStatusAbort {
+type ExecutionStateAbort {
   _: Boolean
 }
 
-type ExecutionStatusPending {
+type ExecutionStatePending {
   _: Boolean
 }
 
