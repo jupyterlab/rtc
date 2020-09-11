@@ -1,17 +1,16 @@
-import dataclasses
-from dataclasses import dataclass
-import typing
 import asyncio
+import dataclasses
+import typing
+from dataclasses import dataclass
 
-import jupyter_client.manager
-
+import ipython_genutils.importstring
 import jupyter_client.kernelspec
+import jupyter_client.manager
 import jupyter_server.serverapp
 import jupyter_server.services.config
 import jupyter_server.services.contents.manager
 import jupyter_server.services.kernels.kernelmanager
 import jupyter_server.services.sessions.sessionmanager
-import ipython_genutils.importstring
 import terminado
 
 from .pubsub import PubSub

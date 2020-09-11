@@ -7,7 +7,6 @@ We should refactor this at some point to:
 """
 
 import dataclasses
-from sys import executable
 import typing
 
 import ariadne

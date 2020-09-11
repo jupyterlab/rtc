@@ -3,12 +3,12 @@ import dataclasses
 import time
 import typing
 from typing import AsyncGenerator
-import ariadne
 
+import ariadne
 import graphql
-from graphql.execution.execute import ExecutionResult
-import pytest
 import graphql.type.schema
+import pytest
+from graphql.execution.execute import ExecutionResult
 
 from .resources import *
 from .schema import *
@@ -431,7 +431,7 @@ async def test_kernels_subscriptions(query, subscribe):
 
     async def assert_kernel_status_starting():
         # Sometimes we capture starting, sometimes not, non deterministic
-        assert (kernel_execution_states == ["STARTING"])
+        assert kernel_execution_states == ["STARTING"]
 
     # Verify that kernel was started
     await assert_eventually(assert_kernel_created)
@@ -458,7 +458,9 @@ async def test_kernels_subscriptions(query, subscribe):
 
     async def assert_kernel_statuses_busy_idle():
         # Sometimes we capture starting, sometimes not, non deterministic
-        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE"]) or (kernel_execution_states == ["BUSY", "IDLE"])
+        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE"]) or (
+            kernel_execution_states == ["BUSY", "IDLE"]
+        )
 
     await assert_kernel_created()
     assert kernel_deleted_ids == []
@@ -484,7 +486,12 @@ async def test_kernels_subscriptions(query, subscribe):
         assert kernel_deleted_ids == [id]
 
     async def assert_kernel_statuses_stopped():
-        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE", _stopped] or kernel_execution_states == ["BUSY", "IDLE", _stopped])
+        assert kernel_execution_states == [
+            "STARTING",
+            "BUSY",
+            "IDLE",
+            _stopped,
+        ] or kernel_execution_states == ["BUSY", "IDLE", _stopped]
 
     await assert_eventually(assert_kernel_stopped)
     await assert_eventually(assert_kernel_statuses_stopped)
