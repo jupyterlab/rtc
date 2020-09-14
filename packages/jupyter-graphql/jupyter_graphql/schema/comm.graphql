@@ -1,0 +1,44 @@
+type Comm implements Node {
+  id: ID!
+  """
+  UUID of comm
+  """
+  commID: String!
+  targetName: String!
+}
+
+input OpenCommInput {
+  targetName: String!
+  data: JSON!
+  clientMutationId: String
+}
+
+type OpenCommPayload {
+  comm: Comm!
+  clientMutationId: String
+}
+
+input CommMessageInput {
+  id: ID!
+  data: JSON!
+  clientMutationId: String
+}
+
+type CommMessageInput {
+  comm: Comm!
+  clientMutationId: String
+}
+
+input CloseCommInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type CloseCommInput {
+  clientMutationId: String
+}
+
+type CommMessage {
+  comm: Comm!
+  data: JSON!
+}

@@ -1,0 +1,193 @@
+type Execution implements Node {
+  id: ID!
+  code: String!
+
+  """
+  The kernel this execution was a part of, if it is still running.
+  """
+  kernel: Kernel
+  """
+  The session of the kernel, present if and only if the jernel is present
+  """
+  kernelSession: String
+
+  """
+  Only present if the request has finished.
+  """
+  status: ExecutionState
+
+  """
+  A list of all displays.
+
+  On a display update, any displays with that ID will be updated.
+
+  On clear output, all previous displays will be cleared.
+  """
+  displays(
+    first: Int
+    last: Int
+    before: Cursor
+    after: Cursor
+  ): DisplaysConnection!
+
+  """
+  An input request, if active.
+  """
+  inputRequest: InputRequest
+}
+
+type DisplaysConnection {
+  edges: [DisplaysEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DisplaysEdge {
+  cursor: Cursor!
+  node: Display!
+}
+
+union ExecutionState =
+    ExecutionStateOK
+  | ExecutionStateAbort
+  | ExecutionStateError
+
+type ExecutionStateOK {
+  executionCount: Int
+  """
+  Data as JSON.
+
+  We could represent as map, and add pagination, if we want to add support
+  for just getting some data or metadata, but not all of it.
+  """
+  data: JSON!
+  metadata: JSON!
+}
+
+type ExecutionStateError {
+  name: String!
+  value: String!
+  traceback: [String!]!
+  executionCount: Int
+}
+
+type ExecutionStateAbort {
+  executionCount: Int
+}
+
+union Display = DisplayStream | DisplayData
+
+"""
+An input request
+"""
+type InputRequest {
+  """
+  The text to show at the prompt
+  """
+  prompt: String!
+  """
+  Is the request for a password?
+  If so, the frontend shouldn't echo input.
+  """
+  password: Boolean!
+}
+
+enum DisplayStreamName {
+  STDOUT
+  STDERR
+}
+
+type DisplayStream {
+  name: DisplayStreamName!
+  text: String!
+}
+
+type DisplayData {
+  data: JSON!
+  metadata: JSON!
+  displayID: String
+}
+
+
+input ExecuteInput {
+  clientMutationId: String
+
+  """
+  Source code to be executed by the kernel, one or more lines.
+  """
+  code: String!
+
+  """
+  A boolean flag which, if True, signals the kernel to execute
+  this code as quietly as possible.
+  silent=True forces store_history to be False,
+  and will *not*:
+    - broadcast output on the IOPUB channel
+    - have an execute_result
+  The default is False.
+  """
+  silent: Boolean
+
+  """
+  A boolean flag which, if True, signals the kernel to populate history
+  The default is True if silent is False.  If silent is True, store_history
+  is forced to be False.
+  """
+  storeHistory: Boolean
+
+  """
+  A JSON serialized dict mapping names to expressions to be evaluated in the
+  user's dict. The rich display-data representation of each will be evaluated after execution.
+  See the display_data content for the structure of the representation data.
+
+  Default is empty.
+  """
+  userExpressions: JSON
+  """
+  Some frontends do not support stdin requests.
+  If this is true, code running in the kernel can prompt the user for input
+  with an input_request message. If it is false, the kernel
+  should not send these messages.
+
+  Defaults to true.
+  """
+  allowStdin: Boolean
+
+  """
+  A boolean flag, which, if True, aborts the execution queue if an exception is encountered.
+  If False, queued execute_requests will execute even if this request generates an exception.
+
+  Defaults to true.
+  """
+  stopOnError: Boolean
+}
+
+type ExecutePayload {
+  clientMutationId: String
+
+  execution: Execution!
+}
+
+
+type ExecutionEventPayload {
+  execution: Execution!
+  event: ExecutionEvent
+}
+
+union ExecutionEvent =
+    DisplayStream
+  | DisplayData
+  | InputRequest
+  | ExecutionState
+  | ClearOutputEvent
+
+"""
+Clear all existing output.
+"""
+type ClearOutputEvent {
+  """
+  Wait to clear the output until new output is available.  Clears the
+  existing output immediately before the new output is displayed.
+  Useful for creating simple animations with minimal flickering.
+  """
+  wait: Boolean!
+}

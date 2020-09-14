@@ -1,0 +1,46 @@
+"""
+Kernel Specification.
+
+Provides all fields from KernelSpec file as defined in
+[Jupyter Client docs](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernelspecs).
+
+*TODO*: Add resources
+"""
+type KernelSpec implements Node {
+  id: ID!
+
+  """
+  A unique kernel name.
+  """
+  name: String!
+
+  """
+  A list of command line arguments used to start the kernel.
+  The text `{connection_file}` in any argument will be replaced with the path to the connection file.
+  """
+  argv: [String!]!
+
+  """
+  The kernel’s name as it should be displayed in the UI. Unlike the kernel name used in the API, this can contain arbitrary unicode characters.
+  """
+  displayName: String!
+
+  """
+  The name of the language of the kernel. When loading notebooks, if no matching kernelspec key (may differ across machines) is found, a kernel with a matching language will be used. This allows a notebook written on any Python or Julia kernel to be properly associated with the user’s Python or Julia kernel, even if they aren’t listed under the same name as the author’s.
+  """
+  language: String!
+
+  """
+  Assumes the default of `SIGNAL` if it is not specified in the spec file.
+  """
+  interruptMode: KernelSpecInterruptMode!
+
+  """
+  A dictionary of environment variables to set for the kernel. These will be added to the current environment variables before the kernel is started. Existing environment variables can be referenced using `${<ENV_VAR>}` and will be substituted with the corresponding value. Administrators should note that use of `${<ENV_VAR>}` can expose sensitive variables and should use only in controlled circumstances.
+  """
+  env: JSON!
+  """
+  A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection. Metadata added here should be namespaced for the tool reading and writing that metadata.
+  """
+  metadata: JSON!
+}

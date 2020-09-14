@@ -1,0 +1,4 @@
+"""
+JSON serialized as a string.
+"""
+scalar JSON

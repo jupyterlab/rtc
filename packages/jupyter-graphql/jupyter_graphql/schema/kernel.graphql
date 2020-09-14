@@ -1,0 +1,448 @@
+
+type Kernel implements Node {
+  id: ID!
+
+  """
+  ID of the kernel according to the server
+
+  TODO: Do we call this UUID or ID? mismatched terminology on jupyter server
+  https://jupyter-server.readthedocs.io/en/latest/developers/rest-api.html#get--api-kernels-kernel_id
+  """
+  kernelID: String!
+
+  """
+  The kernelspec this kernel was created from
+  """
+  spec: KernelSpec!
+
+  """
+  ?
+  """
+  lastActivity: String!
+
+  """
+  The last recorded exeuction state of the server, from the kernel process, combined
+  with some semantics we add on restarting and dead kernels.
+  """
+  executionState: KernelExecutionState!
+
+  """
+  Connections to the kernel from the Jupyter Server
+  """
+  connections: Int!
+
+  """
+  Information returned by kernel info request,
+  which is automatically sent after starting a kernel.
+
+  Requesting any fields from this will make sure the kernel blocks until the info request
+  returns to send the response.
+  """
+  info: KernelInfo!
+}
+
+type KernelInfo {
+  """
+  Version of messaging protocol.
+  The first integer indicates major version.  It is incremented when
+  there is any backward incompatible change.
+  The second integer indicates minor version.  It is incremented when
+  there is any backward compatible change.
+  """
+  protocolVersion: String!
+
+  """
+  The kernel implementation name
+  (e.g. 'ipython' for the IPython kernel)
+  """
+  implementation: String!
+
+  """
+  Implementation version number.
+  The version number of the kernel's implementation
+  (e.g. IPython.__version__ for the IPython kernel)
+  """
+  implementationVersion: String!
+
+  """
+  Information about the language of code for the kernel
+  """
+  languageInfo: LanguageInfo!
+
+  """
+  A banner of information about the kernel,
+  which may be desplayed in console environments.
+  """
+  banner: String!
+
+  """
+  Optional: A list of dictionaries, each with keys 'text' and 'url'.
+  These will be displayed in the help menu in the notebook UI.
+  """
+  helpLinks: [HelpLink!]
+}
+
+type HelpLink {
+  text: String!
+  url: String!
+}
+
+type LanguageInfo {
+  """
+  Name of the programming language that the kernel implements.
+  Kernel included in IPython returns 'python'.
+  """
+  name: String!
+
+  """
+  Language version number.
+  It is Python version number (e.g., '2.7.3') for the kernel
+  included in IPython.
+  """
+  version: String!
+
+  """
+  mimetype for script files in this language
+  """
+  mimetype: String!
+
+  """
+  Extension including the dot, e.g. '.py'
+  """
+  fileExtension: String!
+
+  """
+  Pygments lexer, for highlighting
+  Only needed if it differs from the 'name' field.
+  """
+  pygmentsLexer: String
+
+  """
+  Codemirror mode, for for highlighting in the notebook.
+  Only needed if it differs from the 'name' field.
+
+  JSON serialized str or dict
+  """
+  codemirrorMode: JSON
+
+  """
+  Nbconvert exporter, if notebooks written with this kernel should
+  be exported with something other than the general 'script'
+  exporter.
+  """
+  nbconvertExporter: String!
+}
+
+
+enum KernelExecutionState {
+  """
+  Kernel is busy executing code
+  """
+  BUSY
+  """
+  Kernel is idle.
+  """
+  IDLE
+  """
+  Kernel is starting.
+  """
+  STARTING
+
+  """
+  Kernel is in the middle of restarting.
+  """
+  RESTARTING
+
+  """
+  Kernel is in the process of shutting down.
+  """
+  SHUTTING_DOWN
+
+  """
+  Kernel tried to restart and failed.
+  TODO: What does the user do in this case? Try to restart again?
+  """
+  DEAD
+}
+
+"""
+Specifies how a client is supposed to interrupt cell execution on this kernel.
+"""
+enum KernelSpecInterruptMode {
+  "Send an interrupt signal via the operating system’s signalling facilities (e.g. `SIGINT` on POSIX systems)"
+  SIGNAL
+  "Send an `interrupt_request` message on the control channel (see Kernel interrupt)."
+  MESSAGE
+}
+
+
+
+input StartKernelInput {
+  clientMutationId: String
+
+  """
+  Kernel spec name (defaults to default kernel spec for server)
+
+  # TODO: Should this be a kernel spec ID instead of a name?
+  """
+  kernelspecName: String
+
+  """
+  API path from root to the cwd of the kernel
+  """
+  path: String
+}
+
+type StartKernelPayload {
+  clientMutationId: String
+
+  """
+  The kernel that was started
+  """
+  kernel: Kernel!
+}
+
+input StopKernelInput {
+  clientMutationId: String
+
+  """
+  The ID of the kernel to stop
+  """
+  id: ID!
+}
+
+type StopKernelPayload {
+  clientMutationId: String
+  """
+  The kernel ID that was triggered to stop.
+  """
+  id: ID!
+}
+
+input InterruptKernelInput {
+  clientMutationId: String
+
+  """
+  The ID of the kernel to interrupt
+  """
+  id: ID!
+}
+
+type InterruptKernelPayload {
+  clientMutationId: String
+  """
+  The kernel that was interrupted
+  """
+  kernel: Kernel!
+}
+
+input RestartKernelInput {
+  clientMutationId: String
+
+  """
+  The ID of the kernel to restart
+  """
+  id: ID!
+}
+
+
+
+input InspectInput {
+  clientMutationId: String
+
+  """
+  The code context in which introspection is requested
+  this may be up to an entire multiline cell.
+  """
+  code: String!
+
+  """
+  The cursor position within 'code' (in unicode characters) where inspection is requested
+  """
+  cursorPos: Int!
+
+  """
+  The level of detail desired.  In IPython, the default (0) is equivalent to typing
+  'x?' at the prompt, 1 is equivalent to 'x??'.
+  The difference is up to kernels, but in IPython level 1 includes the source code
+  if available.
+  """
+  detailLevel: Int!
+}
+
+type InspectPayload {
+  clientMutationId: String
+
+  reply: InspectReply!
+}
+
+union InspectReply = InspectOK | ShellAbort | ShellError
+
+type InspectOK {
+  """
+  found should be true if an object was found, false otherwise
+  """
+  found: Boolean
+
+  """
+  The reply is a mime-bundle, like a display_data message, which should be a formatted representation of information about the context. In the notebook, this is used to show tooltips over function calls, etc.
+
+  data can be empty if nothing is found
+  """
+  data: JSON!
+  metadata: JSON!
+}
+
+type ShellError {
+  name: String!
+  value: String!
+  traceback: [String!]!
+}
+
+type ShellAbort {
+  _: Boolean
+}
+
+input CompleteInput {
+  clientMutationId: String
+  """
+  The code context in which completion is requested
+  this may be up to an entire multiline cell, such as
+  `foo = a.isal`
+  """
+  code: String!
+
+  """
+  The cursor position within 'code' (in unicode characters) where completion is requested
+  """
+  cursorPos: Int!
+}
+
+type CompletePayload {
+  clientMutationId: String
+
+  reply: CompleteReply!
+}
+
+union CompleteReply = CompleteOK | ShellAbort | ShellError
+
+type CompleteOK {
+  """
+  The list of all matches to the completion request, such as
+  ['a.isalnum', 'a.isalpha'] for the above example.
+  """
+  matches: [String!]!
+
+  """
+  The range of text that should be replaced by the above matches when a completion is accepted.
+  typically cursor_end is the same as cursor_pos in the request.
+  """
+  cursorStart: Int!
+  cursorEnd: Int!
+
+  """
+  JSON object
+  Information that frontend plugins might use for extra display information about completions.
+  """
+  metadata: JSON!
+}
+
+input IsCompleteInput {
+  clientMutationId: String
+  """
+  The code entered so far as a multiline string
+  """
+  code: String!
+}
+
+type IsCompletePayload {
+  clientMutationId: String
+
+  reply: CompleteReply!
+}
+
+union IsCompleteReply = IsCompleteOK | ShellAbort | ShellError
+
+type IsCompleteOK {
+  status: IsCompleteOKStatus
+}
+union IsCompleteOKStatus =
+    IsCompleteStatusComplete
+  | IsCompleteStatusIncomplete
+  | IsCompleteStatusInvalid
+  | IsCompleteStatusUnknown
+
+"""
+code is ready to be executed
+"""
+type IsCompleteStatusComplete {
+  _: Boolean
+}
+
+"""
+code should prompt for another line
+"""
+type IsCompleteStatusIncomplete {
+  """
+  the characters to use
+  to indent the next line. This is only a hint: frontends may ignore it
+  and use their own autoindentation rules. For other statuses, this
+  field does not exist.
+  """
+  indent: String
+}
+
+"""
+code will typically be sent for execution, so that the user sees the error soonest.
+"""
+type IsCompleteStatusInvalid {
+  _: Boolean
+}
+
+"""
+the kernel is not able to determine this. The frontend should also handle the kernel not replying promptly. It may default to sending the code for execution, or it may implement simple fallback heuristics for whether to execute the code (e.g. execute after a blank line).
+"""
+type IsCompleteStatusUnknown {
+  _: Boolean
+}
+
+type RestartKernelPayload {
+  clientMutationId: String
+  """
+  The kernel that was restarted
+  """
+  kernel: Kernel!
+}
+
+
+input DebugInput {
+  clientMutationId: String
+  content: JSON!
+}
+
+type DebugPayload {
+  clientMutationId: String
+
+  reply: DebugReply!
+}
+
+union DebugReply = DebugOK | ShellAbort | ShellError
+
+type DebugOK {
+  content: JSON!
+}
+
+
+input ReplyInput {
+  """
+  The ID of the execution to reply to
+  """
+  id: ID!
+  clientMutationId: String
+  value: String!
+}
+
+input ReplyPayload {
+  clientMutationId: String!
+  execution: Execution!
+}
