@@ -1,4 +1,3 @@
-
 type Kernel implements Node {
   id: ID!
 
@@ -133,7 +132,6 @@ type LanguageInfo {
   nbconvertExporter: String!
 }
 
-
 enum KernelExecutionState {
   """
   Kernel is busy executing code
@@ -174,8 +172,6 @@ enum KernelSpecInterruptMode {
   "Send an `interrupt_request` message on the control channel (see Kernel interrupt)."
   MESSAGE
 }
-
-
 
 input StartKernelInput {
   clientMutationId: String
@@ -244,8 +240,6 @@ input RestartKernelInput {
   """
   id: ID!
 }
-
-
 
 input InspectInput {
   clientMutationId: String
@@ -414,7 +408,6 @@ type RestartKernelPayload {
   kernel: Kernel!
 }
 
-
 input DebugInput {
   clientMutationId: String
   content: JSON!
@@ -432,7 +425,6 @@ type DebugOK {
   content: JSON!
 }
 
-
 input ReplyInput {
   """
   The ID of the execution to reply to
@@ -442,7 +434,7 @@ input ReplyInput {
   value: String!
 }
 
-input ReplyPayload {
+type ReplyPayload {
   clientMutationId: String!
   execution: Execution!
 }

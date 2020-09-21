@@ -1,7 +1,7 @@
 import importlib.resources
 
 __all__ = ["GRAPHQL_SCHEMA_PATH", "EXAMPLE_QUERY_STR"]
-with importlib.resources.path("jupyter_graphql", "schema/") as path:
+with importlib.resources.path("jupyter_graphql", "schema") as path:
     GRAPHQL_SCHEMA_PATH = path
 
 

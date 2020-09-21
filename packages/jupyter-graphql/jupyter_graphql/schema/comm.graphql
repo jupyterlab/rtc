@@ -24,7 +24,7 @@ input CommMessageInput {
   clientMutationId: String
 }
 
-type CommMessageInput {
+type CommMessagePayload {
   comm: Comm!
   clientMutationId: String
 }
@@ -34,7 +34,7 @@ input CloseCommInput {
   clientMutationId: String
 }
 
-type CloseCommInput {
+type CloseCommPayload {
   clientMutationId: String
 }
 

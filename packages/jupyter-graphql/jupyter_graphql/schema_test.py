@@ -88,19 +88,6 @@ async def assert_eventually(
             return
 
 
-async def test_schema_example(query):
-    assert await query(EXAMPLE_QUERY_STR) == {
-        "execution": {
-            "code": "some code",
-            "status": {"__typename": "ExecutionStatePending"},
-            "displays": {
-                "pageInfo": {"hasNextPage": False},
-                "edges": [{"node": {"data": "JSON! from hi"}}],
-            },
-        }
-    }
-
-
 async def test_kernelspecs(query):
     assert (
         await query(
@@ -194,7 +181,9 @@ async def test_kernels_mutations(query):
                     kernel {
                         id,
                         kernelID,
-                        name
+                        spec {
+                            name
+                        }
                     }
                 }
             }
@@ -212,7 +201,9 @@ async def test_kernels_mutations(query):
             kernels {
                 id,
                 kernelID,
-                name
+                spec {
+                    name
+                }
             }
             kernel(kernelID: $kernelID) {
                 id
@@ -231,7 +222,7 @@ async def test_kernels_mutations(query):
     assert len(results["kernels"]) == 1
     assert results["kernels"][0]["id"] == id
     assert results["kernels"][0]["kernelID"] == kernel_id
-    assert results["kernels"][0]["name"] == start_kernel_payload["kernel"]["name"]
+    assert results["kernels"][0]["spec"] == start_kernel_payload["kernel"]["spec"]
 
     # test getting kernel
     assert results["kernel"]["id"] == id
@@ -486,12 +477,16 @@ async def test_kernels_subscriptions(query, subscribe):
         assert kernel_deleted_ids == [id]
 
     async def assert_kernel_statuses_stopped():
-        assert kernel_execution_states == [
-            "STARTING",
-            "BUSY",
-            "IDLE",
-            _stopped,
-        ] or kernel_execution_states == ["BUSY", "IDLE", _stopped]
+        assert (
+            kernel_execution_states
+            == [
+                "STARTING",
+                "BUSY",
+                "IDLE",
+                _stopped,
+            ]
+            or kernel_execution_states == ["BUSY", "IDLE", _stopped]
+        )
 
     await assert_eventually(assert_kernel_stopped)
     await assert_eventually(assert_kernel_statuses_stopped)

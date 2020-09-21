@@ -128,23 +128,23 @@ class SchemaFactory(Services):
         )
 
         return {
-            "kernel": self.serialize_kernel(kernel_id),
+            "kernel": await self.serialize_kernel(kernel_id),
             "clientMutationId": input["clientMutationId"],
         }
 
-    def resolve_kernels(self, _, info):
+    async def resolve_kernels(self, _, info):
         return [
-            self.serialize_kernel(kernel_id)
+            await self.serialize_kernel(kernel_id)
             for kernel_id in self.kernel_manager.pinned_superclass.list_kernel_ids(
                 self.kernel_manager
             )
         ]
 
-    def resolve_kernel(self, _, info, kernelID: str):
-        return self.serialize_kernel(kernelID)
+    async def resolve_kernel(self, _, info, kernelID: str):
+        return await self.serialize_kernel(kernelID)
 
-    def resolve_kernel_by_id(self, _, info, id: str):
-        return self.serialize_kernel(deserialize_id(id).name)
+    async def resolve_kernel_by_id(self, _, info, id: str):
+        return await self.serialize_kernel(deserialize_id(id).name)
 
     async def resolve_stop_kernel(self, _, info, input):
         kernel_id = deserialize_id(input["id"]).name
@@ -230,12 +230,12 @@ class SchemaFactory(Services):
             ],
         }
 
-    def serialize_kernel(self, kernel_id, execution_state=None):
+    async def serialize_kernel(self, kernel_id, execution_state=None):
         kernel = self.kernel_manager._kernels[kernel_id]
         return {
             "id": serialize_id("kernel", kernel_id),
             "kernelID": kernel_id,
-            "name": kernel.kernel_name,
+            "spec": await self.resolve_kernelspec(None, None, kernel.kernel_name),
             "lastActivity": jupyter_server._tz.isoformat(kernel.last_activity),
             "executionState": (execution_state or kernel.execution_state).upper(),
             "connections": self.kernel_manager._kernel_connections[kernel_id],
@@ -245,6 +245,7 @@ class SchemaFactory(Services):
 def serialize_kernelspec(name: str, spec: dict) -> dict:
     return {
         "id": serialize_id("kernelspec", name),
+        "name": name,
         "argv": spec["argv"],
         "displayName": spec["display_name"],
         "language": spec["language"],
