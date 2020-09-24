@@ -129,7 +129,7 @@ class SchemaFactory(Services):
 
         return {
             "kernel": await self.serialize_kernel(kernel_id),
-            "clientMutationId": input["clientMutationId"],
+            "clientMutationId": input.get("clientMutationId"),
         }
 
     async def resolve_kernels(self, _, info):
@@ -151,7 +151,7 @@ class SchemaFactory(Services):
         await jupyter_server.utils.ensure_async(
             self.kernel_manager.shutdown_kernel(kernel_id)
         )
-        return {"clientMutationId": input["clientMutationId"], "id": input["id"]}
+        return {"clientMutationId": input.get("clientMutationId"), "id": input["id"]}
 
     async def resolve_interrupt_kernel(self, _, info, input):
         kernel_id = deserialize_id(input["id"]).name
@@ -159,7 +159,7 @@ class SchemaFactory(Services):
             self.kernel_manager.interrupt_kernel(kernel_id)
         )
         return {
-            "clientMutationId": input["clientMutationId"],
+            "clientMutationId": input.get("clientMutationId"),
             "kernel": self.serialize_kernel(kernel_id),
         }
 
@@ -169,7 +169,7 @@ class SchemaFactory(Services):
             self.kernel_manager.restart_kernel(kernel_id)
         )
         return {
-            "clientMutationId": input["clientMutationId"],
+            "clientMutationId": input.get("clientMutationId"),
             "kernel": self.serialize_kernel(kernel_id),
         }
 
