@@ -1,0 +1,29 @@
+extend type Mutation {
+  """
+  This message type is used with debugging kernels to request specific actions to be performed by the debugger such as adding a breakpoint or stepping into a code.
+  """
+  debug(input: DebugInput!): DebugPayload
+}
+
+extend type Subscription {
+  """
+  Listen to debug events for a certain kernel, returns the content as JSON string.
+  """
+  debugEvent(kernelID: ID!): JSON!
+}
+
+
+input DebugInput {
+  content: JSON!
+}
+
+type DebugPayload {
+
+  reply: DebugReply!
+}
+
+union DebugReply = DebugOK | ShellAbort | ShellError
+
+type DebugOK {
+  content: JSON!
+}

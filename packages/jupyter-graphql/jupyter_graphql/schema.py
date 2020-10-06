@@ -60,7 +60,6 @@ class SchemaFactory(Services):
         mutation.set_field("startKernel", self.resolve_start_kernel)
         query.set_field("kernels", self.resolve_kernels)
         query.set_field("kernel", self.resolve_kernel)
-        query.set_field("kernelByID", self.resolve_kernel_by_id)
         mutation.set_field("stopKernel", self.resolve_stop_kernel)
         mutation.set_field("interruptKernel", self.resolve_interrupt_kernel)
         mutation.set_field("restartKernel", self.resolve_restart_kernel)
@@ -129,7 +128,6 @@ class SchemaFactory(Services):
 
         return {
             "kernel": await self.serialize_kernel(kernel_id),
-            "clientMutationId": input.get("clientMutationId"),
         }
 
     async def resolve_kernels(self, _, info):
@@ -140,10 +138,7 @@ class SchemaFactory(Services):
             )
         ]
 
-    async def resolve_kernel(self, _, info, kernelID: str):
-        return await self.serialize_kernel(kernelID)
-
-    async def resolve_kernel_by_id(self, _, info, id: str):
+    async def resolve_kernel(self, _, info, id: str):
         return await self.serialize_kernel(deserialize_id(id).name)
 
     async def resolve_stop_kernel(self, _, info, input):
@@ -151,7 +146,7 @@ class SchemaFactory(Services):
         await jupyter_server.utils.ensure_async(
             self.kernel_manager.shutdown_kernel(kernel_id)
         )
-        return {"clientMutationId": input.get("clientMutationId"), "id": input["id"]}
+        return {"id": input["id"]}
 
     async def resolve_interrupt_kernel(self, _, info, input):
         kernel_id = deserialize_id(input["id"]).name
@@ -159,7 +154,6 @@ class SchemaFactory(Services):
             self.kernel_manager.interrupt_kernel(kernel_id)
         )
         return {
-            "clientMutationId": input.get("clientMutationId"),
             "kernel": self.serialize_kernel(kernel_id),
         }
 
@@ -169,7 +163,6 @@ class SchemaFactory(Services):
             self.kernel_manager.restart_kernel(kernel_id)
         )
         return {
-            "clientMutationId": input.get("clientMutationId"),
             "kernel": self.serialize_kernel(kernel_id),
         }
 

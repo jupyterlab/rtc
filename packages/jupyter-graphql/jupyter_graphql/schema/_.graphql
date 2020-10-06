@@ -1,3 +1,26 @@
+# Share types
+
+type Query {
+  node(id: ID!): Node
+}
+
+type Mutation {
+  _: Boolean
+}
+
+type Subscription {
+  _: Boolean
+}
+
+"""
+JSON serialized as a string.
+"""
+scalar JSON
+
+##
+# Relay
+##
+
 """
 An object with a globally unique `ID`.
 """

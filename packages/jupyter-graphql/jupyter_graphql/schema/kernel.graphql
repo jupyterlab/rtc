@@ -1,13 +1,58 @@
+extend type Query {
+  kernel(id: ID!): Kernel
+
+  kernels: [Kernel!]!
+}
+
+extend type Mutation {
+  """
+  Start a new kernel.
+
+  Sends a kernel info request after starting.
+  """
+  startKernel(input: StartKernelInput!): StartKernelPayload
+  """
+  Trigger a kernel to shutdown.
+
+  Q: Should this wait till it actually shuts down to return or as soon as shut
+  down has been triggered?
+
+  This will block until the kernel shuts down to return.
+  """
+  stopKernel(input: StopKernelInput!): StopKernelPayload
+  """
+  Interrupt a kernel, giving the response once the message has been sent.
+
+  If the interrupt mode of the kernelspec is signal, it will send a SIGINT,
+  if it is message, it will send an `interrupt_request` message.
+  """
+  interruptKernel(input: InterruptKernelInput!): InterruptKernelPayload
+  """
+  Restart a kernel. Any messages sent while the kernel is restarting will be queued
+  for the next kernel.
+
+  Sends a kernel info request after restarting.
+  """
+  restartKernel(input: RestartKernelInput!): RestartKernelPayload
+}
+
+extend type Subscription {
+  """
+  Triggers whenever a kernel status is updated and completes when it is deleted.
+  """
+  kernelExecutionStateUpdated(id: ID!): Kernel
+  """
+  Triggers whenever a new kernel is created.
+  """
+  kernelCreated: Kernel!
+  """
+  Triggers whenever a kernel is deleted.
+  """
+  kernelDeleted: ID!
+}
+
 type Kernel implements Node {
   id: ID!
-
-  """
-  ID of the kernel according to the server
-
-  TODO: Do we call this UUID or ID? mismatched terminology on jupyter server
-  https://jupyter-server.readthedocs.io/en/latest/developers/rest-api.html#get--api-kernels-kernel_id
-  """
-  kernelID: String!
 
   """
   The kernelspec this kernel was created from
@@ -174,8 +219,6 @@ enum KernelSpecInterruptMode {
 }
 
 input StartKernelInput {
-  clientMutationId: String
-
   """
   Kernel spec name (defaults to default kernel spec for server)
 
@@ -190,8 +233,6 @@ input StartKernelInput {
 }
 
 type StartKernelPayload {
-  clientMutationId: String
-
   """
   The kernel that was started
   """
@@ -199,8 +240,6 @@ type StartKernelPayload {
 }
 
 input StopKernelInput {
-  clientMutationId: String
-
   """
   The ID of the kernel to stop
   """
@@ -208,7 +247,6 @@ input StopKernelInput {
 }
 
 type StopKernelPayload {
-  clientMutationId: String
   """
   The kernel ID that was triggered to stop.
   """
@@ -216,8 +254,6 @@ type StopKernelPayload {
 }
 
 input InterruptKernelInput {
-  clientMutationId: String
-
   """
   The ID of the kernel to interrupt
   """
@@ -225,7 +261,6 @@ input InterruptKernelInput {
 }
 
 type InterruptKernelPayload {
-  clientMutationId: String
   """
   The kernel that was interrupted
   """
@@ -233,58 +268,10 @@ type InterruptKernelPayload {
 }
 
 input RestartKernelInput {
-  clientMutationId: String
-
   """
   The ID of the kernel to restart
   """
   id: ID!
-}
-
-input InspectInput {
-  clientMutationId: String
-
-  """
-  The code context in which introspection is requested
-  this may be up to an entire multiline cell.
-  """
-  code: String!
-
-  """
-  The cursor position within 'code' (in unicode characters) where inspection is requested
-  """
-  cursorPos: Int!
-
-  """
-  The level of detail desired.  In IPython, the default (0) is equivalent to typing
-  'x?' at the prompt, 1 is equivalent to 'x??'.
-  The difference is up to kernels, but in IPython level 1 includes the source code
-  if available.
-  """
-  detailLevel: Int!
-}
-
-type InspectPayload {
-  clientMutationId: String
-
-  reply: InspectReply!
-}
-
-union InspectReply = InspectOK | ShellAbort | ShellError
-
-type InspectOK {
-  """
-  found should be true if an object was found, false otherwise
-  """
-  found: Boolean
-
-  """
-  The reply is a mime-bundle, like a display_data message, which should be a formatted representation of information about the context. In the notebook, this is used to show tooltips over function calls, etc.
-
-  data can be empty if nothing is found
-  """
-  data: JSON!
-  metadata: JSON!
 }
 
 type ShellError {
@@ -297,144 +284,9 @@ type ShellAbort {
   _: Boolean
 }
 
-input CompleteInput {
-  clientMutationId: String
-  """
-  The code context in which completion is requested
-  this may be up to an entire multiline cell, such as
-  `foo = a.isal`
-  """
-  code: String!
-
-  """
-  The cursor position within 'code' (in unicode characters) where completion is requested
-  """
-  cursorPos: Int!
-}
-
-type CompletePayload {
-  clientMutationId: String
-
-  reply: CompleteReply!
-}
-
-union CompleteReply = CompleteOK | ShellAbort | ShellError
-
-type CompleteOK {
-  """
-  The list of all matches to the completion request, such as
-  ['a.isalnum', 'a.isalpha'] for the above example.
-  """
-  matches: [String!]!
-
-  """
-  The range of text that should be replaced by the above matches when a completion is accepted.
-  typically cursor_end is the same as cursor_pos in the request.
-  """
-  cursorStart: Int!
-  cursorEnd: Int!
-
-  """
-  JSON object
-  Information that frontend plugins might use for extra display information about completions.
-  """
-  metadata: JSON!
-}
-
-input IsCompleteInput {
-  clientMutationId: String
-  """
-  The code entered so far as a multiline string
-  """
-  code: String!
-}
-
-type IsCompletePayload {
-  clientMutationId: String
-
-  reply: CompleteReply!
-}
-
-union IsCompleteReply = IsCompleteOK | ShellAbort | ShellError
-
-type IsCompleteOK {
-  status: IsCompleteOKStatus
-}
-union IsCompleteOKStatus =
-    IsCompleteStatusComplete
-  | IsCompleteStatusIncomplete
-  | IsCompleteStatusInvalid
-  | IsCompleteStatusUnknown
-
-"""
-code is ready to be executed
-"""
-type IsCompleteStatusComplete {
-  _: Boolean
-}
-
-"""
-code should prompt for another line
-"""
-type IsCompleteStatusIncomplete {
-  """
-  the characters to use
-  to indent the next line. This is only a hint: frontends may ignore it
-  and use their own autoindentation rules. For other statuses, this
-  field does not exist.
-  """
-  indent: String
-}
-
-"""
-code will typically be sent for execution, so that the user sees the error soonest.
-"""
-type IsCompleteStatusInvalid {
-  _: Boolean
-}
-
-"""
-the kernel is not able to determine this. The frontend should also handle the kernel not replying promptly. It may default to sending the code for execution, or it may implement simple fallback heuristics for whether to execute the code (e.g. execute after a blank line).
-"""
-type IsCompleteStatusUnknown {
-  _: Boolean
-}
-
 type RestartKernelPayload {
-  clientMutationId: String
   """
   The kernel that was restarted
   """
   kernel: Kernel!
-}
-
-input DebugInput {
-  clientMutationId: String
-  content: JSON!
-}
-
-type DebugPayload {
-  clientMutationId: String
-
-  reply: DebugReply!
-}
-
-union DebugReply = DebugOK | ShellAbort | ShellError
-
-type DebugOK {
-  content: JSON!
-}
-
-input ReplyInput {
-  """
-  The ID of the execution to reply to
-  """
-  id: ID!
-  clientMutationId: String
-  value: String!
-}
-
-type ReplyPayload {
-  clientMutationId: String!
-  execution: Execution!
 }

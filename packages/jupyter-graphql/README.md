@@ -1,6 +1,25 @@
 # Jupyter GraphQL
 
 GraphQL powered Jupyter server, that exposes a stateful representation of the executions.
+## Design
+
+TODO:
+- [ ] What verbs to use for CRUD activities? "Create" kernel? "Start" kernel? "open Comm"? "create Comm"?
+
+Don't use clientMutationID: https://github.com/wp-graphql/wp-graphql/issues/1123
+
+
+Anything going to pub channel is saved in memory to be queried later.
+
+
+Don't include kernel history for now. https://jupyter-client.readthedocs.io/en/stable/messaging.html#history
+
+> Most of the history messaging options are not used by Jupyter frontends, and many kernels do not implement them. If you’re implementing these messages in a kernel, the ‘tail’ request is the most useful; this is used by the Qt console, for example. The notebook interface does not use history messages at all.
+> This interface was designed by exposing all the main options of IPython’s history interface. We may remove some options in a future version of the message spec.
+
+
+How to deal with GC of executions? If they are not part of an active kernel or notebook, delete them?
+
 
 ## Development
 

@@ -1,3 +1,21 @@
+extend type Query {
+  execution(id: ID!): Execution
+}
+
+extend type Mutation {
+  """
+  Start executing some code. Does not block for code to finish executing.
+  """
+  execute(input: ExecuteInput!): ExecutePayload
+}
+
+extend type Subscription {
+  """
+  Listen to events about an execution
+  """
+  executionEvents(executionID: ID!): ExecutionEventPayload
+}
+
 type Execution implements Node {
   id: ID!
   code: String!
@@ -7,7 +25,7 @@ type Execution implements Node {
   """
   kernel: Kernel
   """
-  The session of the kernel, present if and only if the jernel is present
+  The session of the kernel, present if and only if the kernel is present
   """
   kernelSession: String
 
@@ -76,21 +94,6 @@ type ExecutionStateAbort {
 
 union Display = DisplayStream | DisplayData
 
-"""
-An input request
-"""
-type InputRequest {
-  """
-  The text to show at the prompt
-  """
-  prompt: String!
-  """
-  Is the request for a password?
-  If so, the frontend shouldn't echo input.
-  """
-  password: Boolean!
-}
-
 enum DisplayStreamName {
   STDOUT
   STDERR
@@ -108,8 +111,6 @@ type DisplayData {
 }
 
 input ExecuteInput {
-  clientMutationId: String
-
   """
   Source code to be executed by the kernel, one or more lines.
   """
@@ -161,8 +162,6 @@ input ExecuteInput {
 }
 
 type ExecutePayload {
-  clientMutationId: String
-
   execution: Execution!
 }
 

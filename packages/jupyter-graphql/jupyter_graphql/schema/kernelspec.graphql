@@ -1,3 +1,9 @@
+extend type Query {
+  kernelspecs: [KernelSpec!]!
+  kernelspec(name: String!): KernelSpec
+  kernelspecByID(id: ID!): KernelSpec
+}
+
 """
 Kernel Specification.
 

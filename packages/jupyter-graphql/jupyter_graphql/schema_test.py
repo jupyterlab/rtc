@@ -169,18 +169,13 @@ async def test_kernels_mutations(query):
         == {"kernels": []}
     )
 
-    client_mutation_id = "some id!"
     start_kernel_payload = (
         await query(
             """
-            mutation($clientMutationId: String!) {
-                startKernel(input: {
-                    clientMutationId: $clientMutationId
-                }) {
-                    clientMutationId,
+            mutation {
+                startKernel(input: {}) {
                     kernel {
                         id,
-                        kernelID,
                         spec {
                             name
                         }
@@ -188,47 +183,35 @@ async def test_kernels_mutations(query):
                 }
             }
             """,
-            clientMutationId=client_mutation_id,
         )
     )["startKernel"]
-    assert start_kernel_payload["clientMutationId"] == client_mutation_id
 
     id = start_kernel_payload["kernel"]["id"]
-    kernel_id = start_kernel_payload["kernel"]["kernelID"]
     results = await query(
         """
-        query($id: ID!, $kernelID: String!) {
+        query($id: ID!) {
             kernels {
                 id,
-                kernelID,
                 spec {
                     name
                 }
             }
-            kernel(kernelID: $kernelID) {
-                id
-            }
-            kernelByID(id: $id) {
+            kernel(id: $id) {
                 id
             }
 
         }
         """,
         id=id,
-        kernelID=kernel_id,
     )
 
     # Test listing kernels
     assert len(results["kernels"]) == 1
     assert results["kernels"][0]["id"] == id
-    assert results["kernels"][0]["kernelID"] == kernel_id
     assert results["kernels"][0]["spec"] == start_kernel_payload["kernel"]["spec"]
 
     # test getting kernel
     assert results["kernel"]["id"] == id
-
-    # test getting kernel by id
-    assert results["kernelByID"]["id"] == id
 
     # TODO: should probably wait till idle
     # if this is resolved https://github.com/jupyter/jupyter_server/issues/305
@@ -238,26 +221,22 @@ async def test_kernels_mutations(query):
     assert (
         await query(
             """
-            mutation($id: ID!, $clientMutationId: String!) {
+            mutation($id: ID!) {
                 restartKernel(input: {
-                    clientMutationId: $clientMutationId,
                     id: $id
                 }) {
-                    clientMutationId,
                     kernel {
-                        kernelID,
+                        id,
                         executionState
                     }
                 }
             }
             """,
             id=id,
-            clientMutationId=client_mutation_id,
         )
         == {
             "restartKernel": {
-                "clientMutationId": client_mutation_id,
-                "kernel": {"kernelID": kernel_id, "executionState": "STARTING"},
+                "kernel": {"id": id, "executionState": "STARTING"},
             }
         }
     )
@@ -269,14 +248,14 @@ async def test_kernels_mutations(query):
                 await query(
                     """
                     query($id: ID!) {
-                        kernelByID(id: $id) {
+                        kernel(id: $id) {
                             executionState
                         }
                     }
                     """,
-                    id=kernel_id,
+                    id=id,
                 )
-            )["kernelByID"]["executionState"]
+            )["kernel"]["executionState"]
             == "RESTARTING"
         )
 
@@ -286,14 +265,14 @@ async def test_kernels_mutations(query):
                 await query(
                     """
                     query($id: ID!) {
-                        kernelByID(id: $id) {
+                        kernel(id: $id) {
                             executionState
                         }
                     }
                     """,
-                    id=kernel_id,
+                    id=id,
                 )
-            )["kernelByID"]["executionState"]
+            )["kernel"]["executionState"]
             == "IDLE"
         )
 
@@ -308,20 +287,17 @@ async def test_kernels_mutations(query):
     assert (
         await query(
             """
-            mutation($id: ID!, $clientMutationId: String!) {
+            mutation($id: ID!) {
                 stopKernel(input: {
-                    clientMutationId: $clientMutationId,
                     id: $id
                 }) {
-                    clientMutationId,
                     id
                 }
             }
             """,
             id=id,
-            clientMutationId=client_mutation_id,
         )
-        == {"stopKernel": {"clientMutationId": client_mutation_id, "id": id}}
+        == {"stopKernel": {"id": id}}
     )
 
     # Verify it's gone
@@ -393,17 +369,14 @@ async def test_kernels_subscriptions(query, subscribe):
     id = (
         await query(
             """
-            mutation($clientMutationId: String!) {
-                startKernel(input: {
-                    clientMutationId: $clientMutationId
-                }) {
+            mutation {
+                startKernel(input: {}) {
                     kernel {
                         id
                     }
                 }
             }
             """,
-            clientMutationId="some id",
         )
     )["startKernel"]["kernel"]["id"]
 
@@ -434,16 +407,16 @@ async def test_kernels_subscriptions(query, subscribe):
 
     await query(
         """
-        mutation($id: ID!, $clientMutationId: String!) {
+        mutation($id: ID!) {
             restartKernel(input: {
-                clientMutationId: $clientMutationId,
                 id: $id
             }) {
-                clientMutationId
+                kernel {
+                    id
+                }
             }
         }
         """,
-        clientMutationId="some id",
         id=id,
     )
 
@@ -460,17 +433,15 @@ async def test_kernels_subscriptions(query, subscribe):
     # Now stop and verify it is at stopped
     await query(
         """
-        mutation($id: ID!, $clientMutationId: String!) {
+        mutation($id: ID!) {
             stopKernel(input: {
-                clientMutationId: $clientMutationId,
                 id: $id
             }) {
-                clientMutationId
+                id
             }
         }
         """,
         id=id,
-        clientMutationId="some id",
     )
 
     async def assert_kernel_stopped():

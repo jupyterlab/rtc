@@ -1,0 +1,53 @@
+extend type Mutation {
+  """
+  Ask the kernel for information about some code. Blocks till response.
+  """
+  inspect(input: InspectInput!): InspectPayload
+
+}
+
+
+input InspectInput {
+
+  """
+  The code context in which introspection is requested
+  this may be up to an entire multiline cell.
+  """
+  code: String!
+
+  """
+  The cursor position within 'code' (in unicode characters) where inspection is requested
+  """
+  cursorPos: Int!
+
+  """
+  The level of detail desired.  In IPython, the default (0) is equivalent to typing
+  'x?' at the prompt, 1 is equivalent to 'x??'.
+  The difference is up to kernels, but in IPython level 1 includes the source code
+  if available.
+  """
+  detailLevel: Int!
+}
+
+
+type InspectPayload {
+
+  reply: InspectReply!
+}
+
+union InspectReply = InspectOK | ShellAbort | ShellError
+
+type InspectOK {
+  """
+  found should be true if an object was found, false otherwise
+  """
+  found: Boolean
+
+  """
+  The reply is a mime-bundle, like a display_data message, which should be a formatted representation of information about the context. In the notebook, this is used to show tooltips over function calls, etc.
+
+  data can be empty if nothing is found
+  """
+  data: JSON!
+  metadata: JSON!
+}
