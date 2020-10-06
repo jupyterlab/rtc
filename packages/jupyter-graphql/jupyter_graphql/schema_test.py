@@ -2,13 +2,10 @@ import asyncio
 import dataclasses
 import time
 import typing
-from typing import AsyncGenerator
 
 import ariadne
-import graphql
 import graphql.type.schema
 import pytest
-from graphql.execution.execute import ExecutionResult
 
 from .resources import *
 from .schema import *
@@ -20,18 +17,37 @@ def schema(serverapp):
     return create_schema(serverapp)
 
 
+def raise_errors_directly(error, debug: bool = False) -> dict:
+    """
+    error formatter that just raises errors directly, so we get full tracebacks
+    """
+    raise error
+
+
 @dataclasses.dataclass
 class QueryCaller:
     schema: graphql.type.schema.GraphQLSchema
 
     async def __call__(self, query: str, expect_error=False, **variables):
-        result = await graphql.graphql(self.schema, query, variable_values=variables)
-        if expect_error:
-            assert result.errors
-        else:
-            assert result.errors is None
+        """
+        if expect error is true, then will verify an error has been raised and return the data.
 
-        return result.data
+        Otherwise, raises a real error
+
+        TODO: Is it bad practice to return an error for not finding something?
+        """
+        success, result = await ariadne.graphql(
+            self.schema,
+            {"query": query, "variables": variables},
+            debug=True,
+            error_formatter=raise_errors_directly
+            if not expect_error
+            else ariadne.format_error,
+        )
+        assert success
+        if expect_error:
+            assert result["errors"]
+        return result["data"]
 
 
 async def assert_results(results: typing.AsyncIterable[graphql.ExecutionResult]):
@@ -46,7 +62,10 @@ class SubscribeCaller:
 
     async def __call__(self, query: str, expect_error=False, **variables):
         success, result = await ariadne.subscribe(
-            self.schema, {"query": query, "variables": variables}
+            self.schema,
+            {"query": query, "variables": variables},
+            debug=True,
+            error_formatter=raise_errors_directly,
         )
         assert success
         assert not isinstance(result, list)
@@ -198,6 +217,9 @@ async def test_kernels_mutations(query):
             }
             kernel(id: $id) {
                 id
+                info {
+                    implementation
+                }
             }
 
         }
@@ -212,6 +234,7 @@ async def test_kernels_mutations(query):
 
     # test getting kernel
     assert results["kernel"]["id"] == id
+    assert results["kernel"]["info"]["implementation"] == "ipython"
 
     # TODO: should probably wait till idle
     # if this is resolved https://github.com/jupyter/jupyter_server/issues/305

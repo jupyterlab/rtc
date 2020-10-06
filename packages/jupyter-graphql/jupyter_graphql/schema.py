@@ -8,6 +8,7 @@ We should refactor this at some point to:
 
 import dataclasses
 import typing
+import json
 
 import ariadne
 import graphql
@@ -81,6 +82,9 @@ class SchemaFactory(Services):
             self.kernel_deleted_generator,
         )
 
+        kernel = ObjectType("Kernel")
+        kernel.set_field("info", self.resolve_kernel_info)
+
         execution = ObjectType("Execution")
         execution.set_field("displays", self.resolve_displays)
 
@@ -88,7 +92,7 @@ class SchemaFactory(Services):
         # kernel_spec.set_field("argv", self.resolve_kernelspec_argv)
 
         self.schema = make_executable_schema(
-            GRAPHQL_SCHEMA_STR, [query, mutation, subscription, execution]
+            GRAPHQL_SCHEMA_STR, [query, mutation, subscription, execution, kernel]
         )
 
         # Save factory on self, so we can access it for debugging when we just have access to schema
@@ -141,6 +145,28 @@ class SchemaFactory(Services):
     async def resolve_kernel(self, _, info, id: str):
         return await self.serialize_kernel(deserialize_id(id).name)
 
+    async def resolve_kernel_info(self, context, info):
+        _, kernel_id = deserialize_id(context["id"])
+        reply = await self.kernel_info_reply(kernel_id)
+        li = reply["language_info"]
+        print("calling")
+        return {
+            "protocolVersion": reply["protocol_version"],
+            "implementation": reply["implementation"],
+            "implementationVersion": reply["implementation_version"],
+            "languageInfo": {
+                "name": li["name"],
+                "version": li["version"],
+                "mimetype": li["mimetype"],
+                "fileExtension": li["file_extension"],
+                "pygmentsLexer": li["pygments_lexer"],
+                "codemirrorMode": json.dumps(li["codemirror_mode"]),
+                "nbconverterExporter": li["nbconvert_exporter"],
+            },
+            "banner": reply["banner"],
+            "helpLinks": reply["help_links"],
+        }
+
     async def resolve_stop_kernel(self, _, info, input):
         kernel_id = deserialize_id(input["id"]).name
         await jupyter_server.utils.ensure_async(
@@ -167,6 +193,7 @@ class SchemaFactory(Services):
         }
 
     def resolve_kernel_execution_state_updated(self, execution_state, info, id: str):
+        # use current execution state passed in, b/c may have changed in mean time
         kernel_id = deserialize_id(id).name
         return self.serialize_kernel(kernel_id, execution_state=execution_state)
 
@@ -227,7 +254,6 @@ class SchemaFactory(Services):
         kernel = self.kernel_manager._kernels[kernel_id]
         return {
             "id": serialize_id("kernel", kernel_id),
-            "kernelID": kernel_id,
             "spec": await self.resolve_kernelspec(None, None, kernel.kernel_name),
             "lastActivity": jupyter_server._tz.isoformat(kernel.last_activity),
             "executionState": (execution_state or kernel.execution_state).upper(),
