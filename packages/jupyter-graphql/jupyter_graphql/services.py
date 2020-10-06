@@ -1,7 +1,5 @@
-import asyncio
 import dataclasses
 import typing
-from dataclasses import dataclass
 
 import ipython_genutils.importstring
 import jupyter_client.kernelspec
@@ -13,44 +11,13 @@ import jupyter_server.services.kernels.kernelmanager
 import jupyter_server.services.sessions.sessionmanager
 import terminado
 
+from .observable_dict import ObservableDict
 from .pubsub import PubSub
 
 __all__ = ["Services"]
 
 
 SERVICES = typing.TypeVar("SERVICES", bound="Services")
-
-
-K = typing.TypeVar("K")
-V = typing.TypeVar("V")
-
-
-class ObservableDict(dict, typing.Generic[K, V]):
-    """
-    Dict where you can observe setting and deleting keys, after the action has completed.
-    """
-
-    def __init__(
-        self,
-        on_set: typing.Callable[[K, V], None],
-        on_del: typing.Callable[[K], None],
-        original: typing.Mapping[K, V],
-    ):
-        self.on_set = on_set
-        self.on_del = on_del
-        super().__init__(original)
-
-    def __setitem__(self, k: K, v: V) -> None:
-        super().__setitem__(k, v)
-        self.on_set(k, v)
-
-    def __delitem__(self, k: K) -> None:
-        super().__delitem__(k)
-        self.on_del(k)
-
-    def pop(self, k, *args, **kwargs):
-        self.on_del(k)
-        super().pop(k, *args, **kwargs)
 
 
 @dataclasses.dataclass
@@ -83,7 +50,7 @@ class Services:
             self._on_kernel_added, self._on_kernel_deleted, self.kernel_manager._kernels
         )
 
-        # Also monkeypatch kernel class so that we can  be notificed when execution state changes
+        # Also monkeypatch kernel class so that we can  be notified when execution state changes
         cls = ipython_genutils.importstring.import_item(
             self.kernel_manager.kernel_manager_class
         )
