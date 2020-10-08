@@ -1,5 +1,6 @@
 import asyncio
 import dataclasses
+import functools
 import time
 import typing
 
@@ -7,6 +8,7 @@ import ariadne
 import graphql.type.schema
 import pytest
 
+from .partial_curry import *
 from .resources import *
 from .schema import *
 from .stopped import *
@@ -24,30 +26,31 @@ def raise_errors_directly(error, debug: bool = False) -> dict:
     raise error
 
 
-@dataclasses.dataclass
-class QueryCaller:
-    schema: graphql.type.schema.GraphQLSchema
+@pytest.fixture
+@partial_curry("schema")
+async def query(
+    schema: graphql.type.schema.GraphQLSchema,
+    query: str,
+    expect_error=False,
+    **variables,
+):
+    """
+    if expect error is true, then will verify an error has been raised and return the data.
 
-    async def __call__(self, query: str, expect_error=False, **variables):
-        """
-        if expect error is true, then will verify an error has been raised and return the data.
-
-        Otherwise, raises a real error
-
-        TODO: Is it bad practice to return an error for not finding something?
-        """
-        success, result = await ariadne.graphql(
-            self.schema,
-            {"query": query, "variables": variables},
-            debug=True,
-            error_formatter=raise_errors_directly
-            if not expect_error
-            else ariadne.format_error,
-        )
-        assert success
-        if expect_error:
-            assert result["errors"]
-        return result["data"]
+    Otherwise, raises a real error.
+    """
+    success, result = await ariadne.graphql(
+        schema,
+        {"query": query, "variables": variables},
+        debug=True,
+        error_formatter=raise_errors_directly
+        if not expect_error
+        else ariadne.format_error,
+    )
+    assert success
+    if expect_error:
+        assert result["errors"]
+    return result["data"]
 
 
 async def assert_results(results: typing.AsyncIterable[graphql.ExecutionResult]):
@@ -56,34 +59,31 @@ async def assert_results(results: typing.AsyncIterable[graphql.ExecutionResult])
         yield res.data
 
 
-@dataclasses.dataclass
-class SubscribeCaller:
-    schema: graphql.type.schema.GraphQLSchema
-
-    async def __call__(self, query: str, expect_error=False, **variables):
-        success, result = await ariadne.subscribe(
-            self.schema,
-            {"query": query, "variables": variables},
-            debug=True,
-            error_formatter=raise_errors_directly,
-        )
-        assert success
-        assert not isinstance(result, list)
-        return assert_results(result)
-
-
 @pytest.fixture
-def query(schema):
-    return QueryCaller(schema)
-
-
-@pytest.fixture
-def subscribe(schema):
-    return SubscribeCaller(schema)
+@partial_curry("schema")
+async def subscribe(
+    schema: graphql.type.schema.GraphQLSchema,
+    query: str,
+    **variables,
+) -> typing.AsyncIterable:
+    success, result = await ariadne.subscribe(
+        schema,
+        {"query": query, "variables": variables},
+        debug=True,
+        error_formatter=raise_errors_directly,
+    )
+    assert success
+    assert not isinstance(result, list)
+    # Returns future of async iterable, so can await first to get subscription ready, then
+    return assert_results(result)
 
 
 async def assert_eventually(
-    callback: typing.Callable[[], typing.Awaitable[None]], timeout=5.0, wait=0.1
+    callback: typing.Callable[..., typing.Awaitable[None]],
+    timeout=2.0,
+    wait=0.1,
+    args: list = [],
+    kwargs: dict = {},
 ) -> None:
     """
     Waits until the `callback` function doesn't raise an exception, failing if it doesn't after `timeout` seconds.
@@ -94,7 +94,7 @@ async def assert_eventually(
     n = 0
     while True:
         try:
-            await callback()
+            await callback(*args, **kwargs)
         except Exception:
             n += 1
             elapsed_time = time.monotonic() - start_time
@@ -174,7 +174,35 @@ async def test_get_kernelspec_by_id(query):
     )
 
 
-async def test_kernels_mutations(query):
+@pytest.fixture
+@partial_curry("query")
+async def assert_kernel_state(query, id: str, state: str) -> None:
+    assert (
+        (
+            await query(
+                """
+                query($id: ID!) {
+                    kernel(id: $id) {
+                        executionState
+                    }
+                }
+                """,
+                id=id,
+            )
+        )["kernel"]["executionState"]
+        == state
+    )
+
+
+@pytest.fixture
+@partial_curry("assert_kernel_state")
+async def assert_kernel_state_eventually(
+    assert_kernel_state, id: str, state: str
+) -> None:
+    await assert_eventually(assert_kernel_state, args=[id, state])
+
+
+async def test_kernels_mutations(query, assert_kernel_state_eventually):
     assert (
         await query(
             """
@@ -226,19 +254,17 @@ async def test_kernels_mutations(query):
         """,
         id=id,
     )
-
-    # Test listing kernels
+    #  After starting a kernel it shows up in the list
     assert len(results["kernels"]) == 1
     assert results["kernels"][0]["id"] == id
     assert results["kernels"][0]["spec"] == start_kernel_payload["kernel"]["spec"]
 
-    # test getting kernel
+    # After starting a kernel you can get it
     assert results["kernel"]["id"] == id
     assert results["kernel"]["info"]["implementation"] == "ipython"
 
-    # TODO: should probably wait till idle
-    # if this is resolved https://github.com/jupyter/jupyter_server/issues/305
-    # await assert_eventually(is_idle)
+    # Starting kernel will eventually be idle
+    await assert_kernel_state_eventually(id, "IDLE")
 
     # Test restarting kernel
     assert (
@@ -249,7 +275,7 @@ async def test_kernels_mutations(query):
                     id: $id
                 }) {
                     kernel {
-                        id,
+                        id
                         executionState
                     }
                 }
@@ -259,52 +285,12 @@ async def test_kernels_mutations(query):
         )
         == {
             "restartKernel": {
-                "kernel": {"id": id, "executionState": "STARTING"},
+                "kernel": {"id": id, "executionState": "RESTARTING"},
             }
         }
     )
 
-    # Wait for it to be startedd
-    async def is_restarting() -> None:
-        assert (
-            (
-                await query(
-                    """
-                    query($id: ID!) {
-                        kernel(id: $id) {
-                            executionState
-                        }
-                    }
-                    """,
-                    id=id,
-                )
-            )["kernel"]["executionState"]
-            == "RESTARTING"
-        )
-
-    async def is_idle() -> None:
-        assert (
-            (
-                await query(
-                    """
-                    query($id: ID!) {
-                        kernel(id: $id) {
-                            executionState
-                        }
-                    }
-                    """,
-                    id=id,
-                )
-            )["kernel"]["executionState"]
-            == "IDLE"
-        )
-
-    # Should wait for restarting once this is resolved
-    # https://github.com/jupyter/jupyter_client/issues/578
-    # await assert_eventually(is_restarting)
-    await assert_eventually(is_idle)
-
-    # TODO: test interrupt
+    await assert_kernel_state_eventually(id, "IDLE")
 
     # Test deleting
     assert (
@@ -361,7 +347,7 @@ async def async_iterable_to_list(
     """
     Turns an async iterable into a list that is updated in another coroutine.
 
-    Waits for that coroutine to start before returnign
+    Waits for that coroutine to start before returning
     """
     items: typing.List[typing.Union[V, Stopped]] = []
     started = asyncio.Event()
@@ -416,15 +402,15 @@ async def test_kernels_subscriptions(query, subscribe):
     async def assert_kernel_created():
         assert kernel_created_ids == [id]
 
-    async def assert_kernel_status_starting():
+    async def assert_kernel_status_idle():
         # Sometimes we capture starting, sometimes not, non deterministic
-        assert kernel_execution_states == ["STARTING"]
+        assert "IDLE" in kernel_execution_states
 
     # Verify that kernel was started
     await assert_eventually(assert_kernel_created)
 
     assert kernel_deleted_ids == []
-    # await assert_eventually(assert_kernel_status_starting)
+    await assert_eventually(assert_kernel_status_idle)
 
     # Try restating and verify statuses update
 
@@ -443,15 +429,12 @@ async def test_kernels_subscriptions(query, subscribe):
         id=id,
     )
 
-    async def assert_kernel_statuses_busy_idle():
-        # Sometimes we capture starting, sometimes not, non deterministic
-        assert (kernel_execution_states == ["STARTING", "BUSY", "IDLE"]) or (
-            kernel_execution_states == ["BUSY", "IDLE"]
-        )
+    async def assert_kernel_statuses_restarted():
+        assert "RESTARTING" in kernel_execution_states
 
     await assert_kernel_created()
     assert kernel_deleted_ids == []
-    await assert_eventually(assert_kernel_statuses_busy_idle)
+    await assert_eventually(assert_kernel_statuses_restarted)
 
     # Now stop and verify it is at stopped
     await query(
@@ -471,16 +454,7 @@ async def test_kernels_subscriptions(query, subscribe):
         assert kernel_deleted_ids == [id]
 
     async def assert_kernel_statuses_stopped():
-        assert (
-            kernel_execution_states
-            == [
-                "STARTING",
-                "BUSY",
-                "IDLE",
-                _stopped,
-            ]
-            or kernel_execution_states == ["BUSY", "IDLE", _stopped]
-        )
+        assert kernel_execution_states[-1] == _stopped
 
     await assert_eventually(assert_kernel_stopped)
     await assert_eventually(assert_kernel_statuses_stopped)

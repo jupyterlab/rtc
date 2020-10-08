@@ -177,19 +177,30 @@ type LanguageInfo {
   nbconvertExporter: String!
 }
 
+"""
+Kernel execution state. It is this state machine:
+
+* Starts on STARTING
+* If the kernel send a BUSY or IDLE and kernel is in starting, move to those.
+* If the kernel is detected to have become unresonspive, it moves to the RESTARTING status.
+  Also if the kernel is being manually restarted, move to this case.
+* If the kernel doesn't respond to the info reply or stops replying to the heartbeat it is killed and moved to DEAD state
+"""
 enum KernelExecutionState {
-  """
-  Kernel is busy executing code
-  """
-  BUSY
-  """
-  Kernel is idle.
-  """
-  IDLE
   """
   Kernel is starting.
   """
   STARTING
+
+  """
+  Kernel is busy executing code
+  """
+  BUSY
+
+  """
+  Kernel is idle.
+  """
+  IDLE
 
   """
   Kernel is in the middle of restarting.
@@ -197,13 +208,7 @@ enum KernelExecutionState {
   RESTARTING
 
   """
-  Kernel is in the process of shutting down.
-  """
-  SHUTTING_DOWN
-
-  """
-  Kernel tried to restart and failed.
-  TODO: What does the user do in this case? Try to restart again?
+  Kernel tried to start and failed.
   """
   DEAD
 }

@@ -6,9 +6,10 @@ We should refactor this at some point to:
 3. Split out core logic interacting with jupyter server from graphql endpoints part. Extract that out into `models.py` maybe.
 """
 
+import asyncio
 import dataclasses
-import typing
 import json
+import typing
 
 import ariadne
 import graphql
@@ -149,7 +150,6 @@ class SchemaFactory(Services):
         _, kernel_id = deserialize_id(context["id"])
         reply = await self.kernel_info_reply(kernel_id)
         li = reply["language_info"]
-        print("calling")
         return {
             "protocolVersion": reply["protocol_version"],
             "implementation": reply["implementation"],
@@ -183,11 +183,15 @@ class SchemaFactory(Services):
             "kernel": self.serialize_kernel(kernel_id),
         }
 
-    async def resolve_restart_kernel(self, _, info, input):
+    def resolve_restart_kernel(self, _, info, input):
         kernel_id = deserialize_id(input["id"]).name
-        await jupyter_server.utils.ensure_async(
-            self.kernel_manager.restart_kernel(kernel_id)
-        )
+        # Don't wait for restart, just kick off task
+        co = self.restart_kernel(kernel_id)
+        if co:
+            asyncio.create_task(co)
+        else:
+            # Kernel wasnt restarted for some reason
+            pass
         return {
             "kernel": self.serialize_kernel(kernel_id),
         }
@@ -256,7 +260,9 @@ class SchemaFactory(Services):
             "id": serialize_id("kernel", kernel_id),
             "spec": await self.resolve_kernelspec(None, None, kernel.kernel_name),
             "lastActivity": jupyter_server._tz.isoformat(kernel.last_activity),
-            "executionState": (execution_state or kernel.execution_state).upper(),
+            "executionState": (
+                execution_state or self.kernel_execution_state_updated[kernel_id].last
+            ).upper(),
             "connections": self.kernel_manager._kernel_connections[kernel_id],
         }
 

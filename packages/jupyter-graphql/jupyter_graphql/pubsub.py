@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
+import enum
 import types
 import typing
 
@@ -10,6 +11,15 @@ __all__ = ["PubSub"]
 from .stopped import *
 
 T = typing.TypeVar("T")
+
+
+# Sentinel to signal no last value
+# https://www.python.org/dev/peps/pep-0484/#support-for-singleton-types-in-unions
+class NoValue(enum.Enum):
+    token = 0
+
+
+_no_value = NoValue.token
 
 
 @dataclasses.dataclass
@@ -37,6 +47,10 @@ class PubSub(typing.Generic[T]):
 
     Any generator created with a stopped pubsub will immediatly end.
 
+    To get the last value:
+
+    >>> p.last
+
     It must use a a context manager so we can properly cleanup after.
     If we had async iterator cleanup functions we wouldn't need this:
     https://www.python.org/dev/peps/pep-0533/
@@ -46,10 +60,22 @@ class PubSub(typing.Generic[T]):
     iterators: typing.List[PubSubAsyncIterator[T]] = dataclasses.field(
         default_factory=list
     )
+    _last: typing.Union[T, NoValue] = _no_value
+
+    @property
+    def last(self) -> T:
+        if isinstance(self._last, NoValue):
+            raise ValueError("no last value")
+        return self._last
+
+    @last.setter
+    def last(self, v: T) -> None:
+        self._last = v
 
     def publish(self, event: T) -> None:
         if self.stopped:
             raise ValueError("Cannot publish to stopped pubsub")
+        self.last = event
         for i in self.iterators:
             i.events.put_nowait(event)
 
