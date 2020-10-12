@@ -1,10 +1,15 @@
 # API to allow opening comms, closing comms, sending messages over existing comms, listening to messages
 # on existing comms, and listening to when comms open and close.
 
-# TODO: Allow filtering comms, either events or list, by kernel and target name?
-
 extend type Query {
-  comms: [Comm]
+  comm(id: ID!): Comm
+}
+
+extend type Kernel {
+  """
+  All comms on this kernel.
+  """
+  comms: [Comm!]!
 }
 
 extend type Mutation {

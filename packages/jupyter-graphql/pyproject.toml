@@ -24,5 +24,9 @@ dev = [
 test = [
     "pytest",
     "pytest_tornasync",
-    "pytest_pudb"
+    "pytest_pudb",
+    "pytest-subtests"
 ]
+
+[tool.pytest.ini_options]
+log_cli = true

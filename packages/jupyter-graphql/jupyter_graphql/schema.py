@@ -22,7 +22,7 @@ from ariadne.objects import ObjectType
 from graphql.type.schema import GraphQLSchema
 
 from .resources import GRAPHQL_SCHEMA_PATH
-from .services import Services
+from .services import DisplayStream, ExecutionStateOK, Services
 
 __all__ = ["create_schema"]
 
@@ -86,14 +86,19 @@ class SchemaFactory(Services):
         kernel = ObjectType("Kernel")
         kernel.set_field("info", self.resolve_kernel_info)
 
-        execution = ObjectType("Execution")
-        execution.set_field("displays", self.resolve_displays)
+        query.set_field("execution", self.resolve_execution)
+        mutation.set_field("execute", self.resolve_execute)
+        # subscription.set_field("executionEvents", self.resolve_execution_events)
+        # subscription.set_source(
+        #     "executionEvents",
+        #     self.execution_events_generator,
+        # )
 
         # kernel_spec = ObjectType("KernelSpec")
         # kernel_spec.set_field("argv", self.resolve_kernelspec_argv)
 
         self.schema = make_executable_schema(
-            GRAPHQL_SCHEMA_STR, [query, mutation, subscription, execution, kernel]
+            GRAPHQL_SCHEMA_STR, [query, mutation, subscription, kernel]
         )
 
         # Save factory on self, so we can access it for debugging when we just have access to schema
@@ -228,29 +233,39 @@ class SchemaFactory(Services):
             async for kernel_id in kernel_ids:
                 yield kernel_id
 
-    def resolve_execution(self, _, info: graphql.GraphQLResolveInfo, id, **kwargs):
-        return {
-            "id": id,
-            "code": "some code",
-            "status": {
-                "__typename": "ExecutionStatePending",
-            },
-        }
+    def resolve_execution(self, obj, info, id):
+        _, execution_id = deserialize_id(id)
+        return self.serialize_execution(execution_id)
 
-    def resolve_displays(
-        self, context, info, first=None, last=None, before=None, after=None
-    ):
+    def resolve_execute(self, obj, info, input):
+        _, kernel_id = deserialize_id(input["kernel"])
+        execution_id = self.execute(kernel_id, input["code"])
+        return {"execution": self.serialize_execution(execution_id)}
+
+    def serialize_execution(self, execution_id: str):
+        execution = self.executions[execution_id][0]
         return {
-            "pageInfo": {"hasNextPage": False},
-            "edges": [
-                {
-                    "cursor": "hii",
-                    "node": {
-                        "__typename": "DisplayData",
-                        "data": f"JSON! from {context['id']}",
-                        "metadata": "JSON!",
-                    },
+            "id": serialize_id("execution", execution_id),
+            "code": execution.code,
+            "kernel": self.serialize_kernel(execution.kernel_id),
+            "kernelSession": execution.kernel_session,
+            "status": {
+                "__typename": "ExecutionStateOK",
+                "executionCount": execution.status.execution_count,
+                "data": json.dumps(execution.status.data),
+                "metadata": json.dumps(execution.status.metadata),
+            }
+            if isinstance(execution.status, ExecutionStateOK)
+            else None,
+            "displays": [
+                {"name": d.name.upper(), "text": d.text, "__typename": "DisplayStream"}
+                if isinstance(d, DisplayStream)
+                else {
+                    "data": json.dumps(d.data),
+                    "metadata": json.dumps(d.metadata),
+                    "__typename": "DisplayData",
                 }
+                for d in execution.displays
             ],
         }
 

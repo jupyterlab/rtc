@@ -1,5 +1,15 @@
 extend type Query {
+  """
+  Retrieve an execution.
+  """
   execution(id: ID!): Execution
+}
+
+extend type Kernel {
+  """
+  All executions from this kernel, ordered newest to oldest.
+  """
+  executions: [Execution!]!
 }
 
 extend type Mutation {
@@ -10,6 +20,11 @@ extend type Mutation {
 }
 
 extend type Subscription {
+  """
+  Every execution for this kernel.
+  """
+  executions(kernelId: ID!): Execution
+
   """
   Listen to events about an execution
   """
@@ -26,6 +41,8 @@ type Execution implements Node {
   kernel: Kernel
   """
   The session of the kernel, present if and only if the kernel is present
+
+  TODO: When to update this? When first reply about execution is sent?
   """
   kernelSession: String
 
@@ -41,12 +58,13 @@ type Execution implements Node {
 
   On clear output, all previous displays will be cleared.
   """
-  displays(
-    first: Int
-    last: Int
-    before: Cursor
-    after: Cursor
-  ): DisplaysConnection!
+  displays: [Display!]!
+  # displays(
+  #   first: Int
+  #   last: Int
+  #   before: Cursor
+  #   after: Cursor
+  # ): DisplaysConnection!
 
   """
   An input request, if active.
@@ -82,7 +100,6 @@ type ExecutionStateOK {
 }
 
 type ExecutionStateError {
-  name: String!
   value: String!
   traceback: [String!]!
   executionCount: Int
@@ -112,53 +129,60 @@ type DisplayData {
 
 input ExecuteInput {
   """
+  The ID of the kernel to execute on
+  """
+  kernel: ID!
+
+  """
   Source code to be executed by the kernel, one or more lines.
   """
   code: String!
 
-  """
-  A boolean flag which, if True, signals the kernel to execute
-  this code as quietly as possible.
-  silent=True forces store_history to be False,
-  and will *not*:
-    - broadcast output on the IOPUB channel
-    - have an execute_result
-  The default is False.
-  """
-  silent: Boolean
+  # TODO: Implement below:
 
-  """
-  A boolean flag which, if True, signals the kernel to populate history
-  The default is True if silent is False.  If silent is True, store_history
-  is forced to be False.
-  """
-  storeHistory: Boolean
+  # """
+  # A boolean flag which, if True, signals the kernel to execute
+  # this code as quietly as possible.
+  # silent=True forces store_history to be False,
+  # and will *not*:
+  #   - broadcast output on the IOPUB channel
+  #   - have an execute_result
+  # The default is False.
+  # """
+  # silent: Boolean
 
-  """
-  A JSON serialized dict mapping names to expressions to be evaluated in the
-  user's dict. The rich display-data representation of each will be evaluated after execution.
-  See the display_data content for the structure of the representation data.
+  # """
+  # A boolean flag which, if True, signals the kernel to populate history
+  # The default is True if silent is False.  If silent is True, store_history
+  # is forced to be False.
+  # """
+  # storeHistory: Boolean
 
-  Default is empty.
-  """
-  userExpressions: JSON
-  """
-  Some frontends do not support stdin requests.
-  If this is true, code running in the kernel can prompt the user for input
-  with an input_request message. If it is false, the kernel
-  should not send these messages.
+  # """
+  # A JSON serialized dict mapping names to expressions to be evaluated in the
+  # user's dict. The rich display-data representation of each will be evaluated after execution.
+  # See the display_data content for the structure of the representation data.
 
-  Defaults to true.
-  """
-  allowStdin: Boolean
+  # Default is empty.
+  # """
+  # userExpressions: JSON
+  # """
+  # Some frontends do not support stdin requests.
+  # If this is true, code running in the kernel can prompt the user for input
+  # with an input_request message. If it is false, the kernel
+  # should not send these messages.
 
-  """
-  A boolean flag, which, if True, aborts the execution queue if an exception is encountered.
-  If False, queued execute_requests will execute even if this request generates an exception.
+  # Defaults to true.
+  # """
+  # allowStdin: Boolean
 
-  Defaults to true.
-  """
-  stopOnError: Boolean
+  # """
+  # A boolean flag, which, if True, aborts the execution queue if an exception is encountered.
+  # If False, queued execute_requests will execute even if this request generates an exception.
+
+  # Defaults to true.
+  # """
+  # stopOnError: Boolean
 }
 
 type ExecutePayload {
@@ -167,7 +191,7 @@ type ExecutePayload {
 
 type ExecutionEventPayload {
   execution: Execution!
-  event: ExecutionEvent
+  event: ExecutionEvent!
 }
 
 union ExecutionEvent =

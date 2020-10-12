@@ -5,6 +5,7 @@ import dataclasses
 import functools
 import logging
 import typing
+import uuid
 
 import ipython_genutils.importstring
 import jupyter_client.kernelspec
@@ -56,13 +57,27 @@ class Services:
 
     # List of kernel streams, so we can close them when we need.
     kernel_streams: typing.Dict[
-        str, typing.List[zmq.eventloop.zmqstream.ZMQStream]
+        str, typing.Dict[str, zmq.eventloop.zmqstream.ZMQStream]
     ] = dataclasses.field(default_factory=dict)
 
     # mapping of kernel info ids to futures for their initial kernel info replies
     _kernel_info_replies: typing.Dict[str, asyncio.Future] = dataclasses.field(
         default_factory=dict
     )
+
+    # Mapping of UUID to execution, and execution events
+    executions: typing.Dict[
+        str, typing.Tuple[Execution, PubSub[ExecutionEvent]]
+    ] = dataclasses.field(default_factory=dict)
+
+    # Mapping of kernel ID to list of executions IDs for that kernel, plus a pubsub of new
+    # executions for that kernel
+    executions_by_kernel: typing.Dict[
+        str, typing.Tuple[typing.List[str], PubSub[str]]
+    ] = dataclasses.field(default_factory=dict)
+
+    # Mapping of message ID to execution ID
+    execution_requests: typing.Dict[str, str] = dataclasses.field(default_factory=dict)
 
     async def kernel_info_reply(self, id: str) -> KernelInfoReplyContent:
         return await self._kernel_info_replies[id]
@@ -108,12 +123,20 @@ class Services:
         self.kernel_execution_state_updated[id] = PubSub(_last="starting")
         kernel.__id__ = id
         self._kernel_info_replies[id] = asyncio.get_running_loop().create_future()
+        self.executions_by_kernel[id] = ([], PubSub())
         asyncio.create_task(self._connect_kernel(id))
 
     async def _connect_kernel(self, id: str):
         # TODO: Have manual wait here, otherwise it seems like we connect too fast and wont get actual updates
         # Need to understand why this is
         await asyncio.sleep(0.5)
+        if id not in self.kernel_manager._kernels:
+            logger.info(
+                "Not connecting to kernel, since it has already been deleted when waiting for it to start %s",
+                id,
+            )
+            return
+
         kernel: jupyter_client.manager.KernelManager = self.kernel_manager._kernels[id]
         # Connect iopub before sending kernel info request
         iopub_channel = typing.cast(
@@ -130,13 +153,14 @@ class Services:
         shell_channel.on_recv(functools.partial(self._on_shell_message, id))
         self._session(id).send(shell_channel, "kernel_info_request")
 
-        self.kernel_streams[id] = [shell_channel, iopub_channel]
+        self.kernel_streams[id] = {"shell": shell_channel, "iopub": iopub_channel}
 
     def _disconnect_kernel(self, id: str):
-        for s in self.kernel_streams[id]:
+        for s in self.kernel_streams[id].values():
             s.close()
 
     def _on_kernel_deleted(self, id: str) -> None:
+        logger.info("kernel deleted %s", id)
         self.kernel_deleted.publish(id)
         self.kernel_execution_state_updated[id].stop()
         del self.kernel_execution_state_updated[id]
@@ -162,7 +186,7 @@ class Services:
         """
         execution_state = self.kernel_execution_state_updated[id]
         if (execution_state.last) in ("restarting", "starting"):
-            logger.warn(
+            logger.warning(
                 "Not restarting kernel %s because in state %s", id, execution_state.last
             )
             return None
@@ -179,8 +203,42 @@ class Services:
             )
         )
         # Open new connections and send kernel info request, which will set status.
-
         await self._connect_kernel(id)
+
+    def execute(self, kernel_id: str, code: str) -> str:
+        """
+        Creates an execution and returns its UUID.
+        """
+        # Generate UUUID
+        execution_id = str(uuid.uuid1())
+
+        # Create a new execution
+        execution = Execution(code=code, kernel_id=kernel_id)
+        self.executions[execution_id] = (execution, PubSub())
+
+        # Add to list in parent IDs
+        executions_for_kernel, executions_for_kernel_pubsub = self.executions_by_kernel[
+            kernel_id
+        ]
+        executions_for_kernel.append(execution_id)
+        executions_for_kernel_pubsub.publish(execution_id)
+
+        # Send execute request
+
+        msg = self._session(kernel_id).send(
+            self.kernel_streams[kernel_id]["shell"],
+            "execute_request",
+            {
+                "code": code,
+                "silent": False,
+                "store_history": True,
+                "user_expression": {},
+                "allow_stdin": True,
+            },
+        )
+
+        self.execution_requests[msg["header"]["msg_id"]] = execution_id
+        return execution_id
 
     def _get_execution_state(self, kernel: jupyter_client.manager.KernelManager):
         return kernel._execution_state_value
@@ -196,7 +254,7 @@ class Services:
                 # If we already set the kernel info reply, just ignore this message
                 pass
         else:
-            logger.warn("Unhandled shell message: %s", msg)
+            logger.warning("Unhandled shell message: %s", msg)
             pass
 
     def _on_iopub_message(self, kernel_id: str, original_msg) -> None:
@@ -207,9 +265,39 @@ class Services:
             self.kernel_execution_state_updated[kernel_id].publish(
                 msg["content"]["execution_state"]
             )
+        elif msg_type == "execute_input":
+            request_id = msg["parent_header"]["msg_id"]
+            if request_id not in self.execution_requests:
+                logger.warning("Execution input recieved which we did not create")
+                # TODO: implement adding execution created by other clients
+                return
+        elif msg_type == "execute_result":
+            request_id = msg["parent_header"]["msg_id"]
+            if request_id not in self.execution_requests:
+                logger.warning("Ignoring result for unknown request")
+                return
+
+            execution_id = self.execution_requests[request_id]
+            execution, execution_events = self.executions[execution_id]
+
+            # TODO: Support not ok events
+            execution_state = ExecutionStateOK(**msg["content"])
+            execution.status = execution_state
+            execution_events.publish(execution_state)
+        elif msg_type == "stream":
+            request_id = msg["parent_header"]["msg_id"]
+            if request_id not in self.execution_requests:
+                logger.warning("Ignoring result for unknown stream")
+                return
+            execution_id = self.execution_requests[request_id]
+            execution, execution_events = self.executions[execution_id]
+
+            d = DisplayStream(**msg["content"])
+            execution.displays.append(d)
+            execution_events.publish(d)
+
         else:
-            logger.warn("Unhandled iopub message: %s", msg)
-            pass
+            logger.warning("Unhandled iopub message: %s", msg)
 
     def _parse_message(self, kernel_id: str, msg) -> Message:
         idents, msg_wout_identities = self._session(kernel_id).feed_identities(msg)
@@ -260,3 +348,74 @@ class KernelInfoLanguageInfo(typing.TypedDict):
 class KernelInfoHelpLink(typing.TypedDict):
     text: str
     url: str
+
+
+@dataclasses.dataclass
+class Execution:
+    code: str
+    kernel_id: typing.Optional[str] = None
+    kernel_session: typing.Optional[str] = None
+    status: typing.Optional[ExecutionState] = None
+    displays: typing.List[Display] = dataclasses.field(default_factory=list)
+    input_request: typing.Optional[InputRequest] = None
+
+
+@dataclasses.dataclass
+class ExecutionStateOK:
+    execution_count: typing.Optional[int]
+    data: typing.Dict[str, typing.Any]
+    metadata: typing.Dict[str, typing.Any]
+
+
+@dataclasses.dataclass
+class ExecutionStateError:
+    value: str
+    traceback: typing.List[str]
+    execution_count: int
+
+
+@dataclasses.dataclass
+class ExecutionStateAbort:
+    execution_count: int
+
+
+ExecutionState = typing.Union[
+    ExecutionStateOK, ExecutionStateError, ExecutionStateAbort
+]
+
+
+@dataclasses.dataclass
+class DisplayStream:
+    name: typing.Literal["stdout", "stderr"]
+    text: str
+
+
+@dataclasses.dataclass
+class DisplayData:
+    data: typing.Dict[str, typing.Any]
+    metadata: typing.Dict[str, typing.Any]
+    display_id: typing.Optional[str]
+
+
+Display = typing.Union[DisplayStream, DisplayData]
+
+
+@dataclasses.dataclass
+class ClearOutputEvent:
+    wait: bool
+
+
+@dataclasses.dataclass
+class InputRequest:
+    prompt: str
+    password: bool
+
+
+ExecutionEvent = typing.Union[
+    DisplayStream,
+    DisplayData,
+    InputRequest,
+    ClearOutputEvent,
+    ExecutionStateOK,
+    ExecutionStateError,
+]
