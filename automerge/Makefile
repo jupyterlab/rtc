@@ -4,7 +4,7 @@ CONDA_ACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activ
 CONDA_DEACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda deactivate
 CONDA_REMOVE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda remove -y --all -n
 
-GITHUB_APP_CREDENTIALS=echo "export GITHUB_CLIENT_ID=YOUR_CLIENT_ID_HERE; export GITHUB_CLIENT_SECRET=YOUR_SECRET_HERE"
+GITHUB_APP_CREDENTIALS=export GITHUB_CLIENT_ID='YOUR_CLIENT_ID_HERE'; export GITHUB_CLIENT_SECRET='YOUR_SECRET_HERE'
 
 .PHONY: clean install
 
