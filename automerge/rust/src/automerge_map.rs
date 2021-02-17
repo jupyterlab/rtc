@@ -216,11 +216,12 @@ fn automerge_primivite_to_py<'p>(
         automerge_protocol::ScalarValue::Null => unsafe { &(py.from_owned_ptr(ffi::Py_None())) },
 
         // we're not supposed to store any of the following values in the backend
-        automerge_protocol::ScalarValue::Str(s) => PyString::new(py, "N/A"),
-        automerge_protocol::ScalarValue::Uint(ui) => PyString::new(py, "N/A"),
-        automerge_protocol::ScalarValue::F32(f) => PyString::new(py, "N/A"),
-        automerge_protocol::ScalarValue::Counter(c) => PyString::new(py, "N/A"),
-        automerge_protocol::ScalarValue::Timestamp(t) => PyString::new(py, "N/A"),
+        automerge_protocol::ScalarValue::Str(_) => PyString::new(py, "N/A"),
+        automerge_protocol::ScalarValue::Uint(u_) => PyString::new(py, "N/A"),
+        automerge_protocol::ScalarValue::F32(_) => PyString::new(py, "N/A"),
+        automerge_protocol::ScalarValue::Counter(_) => PyString::new(py, "N/A"),
+        automerge_protocol::ScalarValue::Timestamp(_) => PyString::new(py, "N/A"),
+        _ => unsafe { &(py.from_owned_ptr(ffi::Py_None())) },
     }
 }
 

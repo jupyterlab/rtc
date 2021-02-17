@@ -6,9 +6,9 @@ edition = "2018"
 
 
 [dependencies]
-automerge-backend = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.1" }
-automerge-frontend = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.1" }
-automerge-protocol = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.1" }
+automerge-backend = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.2" }
+automerge-frontend = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.2" }
+automerge-protocol = { git = "https://github.com/pierrotsmnrd/automerge-rs/", tag = "jupyter_rtc_0.0.2" }
 
 log = "0.4.11"
 simplelog = "*"
