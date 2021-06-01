@@ -1,0 +1,32 @@
+
+extend type Mutation {
+  """
+  Reply to an input request on a exection.
+  """
+  replyInput(input: ReplyInputInput!): ReplyInputPayload
+}
+
+type InputRequest {
+    """
+    the text to show at the prompt
+    """
+    prompt: String!
+
+    """
+    Is the request for a password?
+    If so, the frontend shouldn't echo input.
+    """
+    password: Boolean!
+}
+
+input ReplyInputInput {
+  """
+  The ID of the execution to reply to
+  """
+  id: ID!
+  value: String!
+}
+
+type ReplyInputPayload {
+  execution: Execution!
+}

@@ -1,0 +1,47 @@
+extend type Mutation {
+  """
+  Ask the kernel to do code completion
+  """
+  complete(input: CompleteInput!): CompletePayload
+}
+input CompleteInput {
+  """
+  The code context in which completion is requested
+  this may be up to an entire multiline cell, such as
+  `foo = a.isal`
+  """
+  code: String!
+
+  """
+  The cursor position within 'code' (in unicode characters) where completion is requested
+  """
+  cursorPos: Int!
+}
+
+type CompletePayload {
+
+  reply: CompleteReply!
+}
+
+union CompleteReply = CompleteOK | ShellAbort | ShellError
+
+type CompleteOK {
+  """
+  The list of all matches to the completion request, such as
+  ['a.isalnum', 'a.isalpha'] for the above example.
+  """
+  matches: [String!]!
+
+  """
+  The range of text that should be replaced by the above matches when a completion is accepted.
+  typically cursor_end is the same as cursor_pos in the request.
+  """
+  cursorStart: Int!
+  cursorEnd: Int!
+
+  """
+  JSON object
+  Information that frontend plugins might use for extra display information about completions.
+  """
+  metadata: JSON!
+}

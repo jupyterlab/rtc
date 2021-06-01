@@ -1,0 +1,32 @@
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "jupyter_graphql"
+author = "Saul Shanabrook"
+author-email = "s.shanabrook@gmail.com"
+home-page = "https://github.com/jupyterlab/rtc"
+classifiers = ["License :: OSI Approved :: MIT License"]
+requires = [
+    "ariadne",
+    "jupyter_server"
+
+]
+
+[tool.flit.metadata.requires-extra]
+dev = [
+    "mypy",
+    "black",
+    "pudb",
+    "isort"
+]
+test = [
+    "pytest",
+    "pytest_tornasync",
+    "pytest_pudb",
+    "pytest-subtests"
+]
+
+[tool.pytest.ini_options]
+log_cli = true

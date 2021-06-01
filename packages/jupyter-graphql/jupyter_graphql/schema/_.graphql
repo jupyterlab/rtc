@@ -1,0 +1,62 @@
+# Share types
+
+type Query {
+  node(id: ID!): Node
+}
+
+type Mutation {
+  _: Boolean
+}
+
+type Subscription {
+  _: Boolean
+}
+
+"""
+JSON serialized as a string.
+"""
+scalar JSON
+
+##
+# Relay
+##
+
+"""
+An object with a globally unique `ID`.
+"""
+interface Node {
+  """
+  A globally unique identifier. Can be used in various places throughout the system to identify this single value.
+  """
+  id: ID!
+}
+
+"""
+A location in a connection that can be used for resuming pagination.
+"""
+scalar Cursor
+
+"""
+Information about pagination in a connection.
+"""
+type PageInfo {
+  """
+  When paginating forwards, are there more items?
+  """
+  hasNextPage: Boolean!
+
+  """
+  When paginating backwards, are there more items?
+  """
+  hasPreviousPage: Boolean!
+
+  """
+  When paginating backwards, the cursor to continue.
+  """
+  startCursor: Cursor
+
+  """
+  When paginating forwards, the cursor to continue.
+  """
+  endCursor: Cursor
+}

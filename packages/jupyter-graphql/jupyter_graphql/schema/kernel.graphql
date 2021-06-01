@@ -1,0 +1,297 @@
+extend type Query {
+  kernel(id: ID!): Kernel
+
+  kernels: [Kernel!]!
+}
+
+extend type Mutation {
+  """
+  Start a new kernel.
+
+  Sends a kernel info request after starting.
+  """
+  startKernel(input: StartKernelInput!): StartKernelPayload
+  """
+  Trigger a kernel to shutdown.
+
+  Q: Should this wait till it actually shuts down to return or as soon as shut
+  down has been triggered?
+
+  This will block until the kernel shuts down to return.
+  """
+  stopKernel(input: StopKernelInput!): StopKernelPayload
+  """
+  Interrupt a kernel, giving the response once the message has been sent.
+
+  If the interrupt mode of the kernelspec is signal, it will send a SIGINT,
+  if it is message, it will send an `interrupt_request` message.
+  """
+  interruptKernel(input: InterruptKernelInput!): InterruptKernelPayload
+  """
+  Restart a kernel. Any messages sent while the kernel is restarting will be queued
+  for the next kernel.
+
+  Sends a kernel info request after restarting.
+  """
+  restartKernel(input: RestartKernelInput!): RestartKernelPayload
+}
+
+extend type Subscription {
+  """
+  Triggers whenever a kernel status is updated and completes when it is deleted.
+  """
+  kernelExecutionStateUpdated(id: ID!): Kernel
+  """
+  Triggers whenever a new kernel is created.
+  """
+  kernelCreated: Kernel!
+  """
+  Triggers whenever a kernel is deleted.
+  """
+  kernelDeleted: ID!
+}
+
+type Kernel implements Node {
+  id: ID!
+
+  """
+  The kernelspec this kernel was created from
+  """
+  spec: KernelSpec!
+
+  """
+  ?
+  """
+  lastActivity: String!
+
+  """
+  The last recorded exeuction state of the server, from the kernel process, combined
+  with some semantics we add on restarting and dead kernels.
+  """
+  executionState: KernelExecutionState!
+
+  """
+  Connections to the kernel from the Jupyter Server
+  """
+  connections: Int!
+
+  """
+  Information returned by kernel info request,
+  which is automatically sent after starting a kernel.
+
+  Requesting any fields from this will make sure the kernel blocks until the info request
+  returns to send the response.
+  """
+  info: KernelInfo!
+}
+
+type KernelInfo {
+  """
+  Version of messaging protocol.
+  The first integer indicates major version.  It is incremented when
+  there is any backward incompatible change.
+  The second integer indicates minor version.  It is incremented when
+  there is any backward compatible change.
+  """
+  protocolVersion: String!
+
+  """
+  The kernel implementation name
+  (e.g. 'ipython' for the IPython kernel)
+  """
+  implementation: String!
+
+  """
+  Implementation version number.
+  The version number of the kernel's implementation
+  (e.g. IPython.__version__ for the IPython kernel)
+  """
+  implementationVersion: String!
+
+  """
+  Information about the language of code for the kernel
+  """
+  languageInfo: LanguageInfo!
+
+  """
+  A banner of information about the kernel,
+  which may be desplayed in console environments.
+  """
+  banner: String!
+
+  """
+  Optional: A list of dictionaries, each with keys 'text' and 'url'.
+  These will be displayed in the help menu in the notebook UI.
+  """
+  helpLinks: [HelpLink!]
+}
+
+type HelpLink {
+  text: String!
+  url: String!
+}
+
+type LanguageInfo {
+  """
+  Name of the programming language that the kernel implements.
+  Kernel included in IPython returns 'python'.
+  """
+  name: String!
+
+  """
+  Language version number.
+  It is Python version number (e.g., '2.7.3') for the kernel
+  included in IPython.
+  """
+  version: String!
+
+  """
+  mimetype for script files in this language
+  """
+  mimetype: String!
+
+  """
+  Extension including the dot, e.g. '.py'
+  """
+  fileExtension: String!
+
+  """
+  Pygments lexer, for highlighting
+  Only needed if it differs from the 'name' field.
+  """
+  pygmentsLexer: String
+
+  """
+  Codemirror mode, for for highlighting in the notebook.
+  Only needed if it differs from the 'name' field.
+
+  JSON serialized str or dict
+  """
+  codemirrorMode: JSON
+
+  """
+  Nbconvert exporter, if notebooks written with this kernel should
+  be exported with something other than the general 'script'
+  exporter.
+  """
+  nbconvertExporter: String!
+}
+
+"""
+Kernel execution state. It is this state machine:
+
+* Starts on STARTING
+* If the kernel send a BUSY or IDLE and kernel is in starting, move to those.
+* If the kernel is detected to have become unresonspive, it moves to the RESTARTING status.
+  Also if the kernel is being manually restarted, move to this case.
+* If the kernel doesn't respond to the info reply or stops replying to the heartbeat it is killed and moved to DEAD state
+"""
+enum KernelExecutionState {
+  """
+  Kernel is starting.
+  """
+  STARTING
+
+  """
+  Kernel is busy executing code
+  """
+  BUSY
+
+  """
+  Kernel is idle.
+  """
+  IDLE
+
+  """
+  Kernel is in the middle of restarting.
+  """
+  RESTARTING
+
+  """
+  Kernel tried to start and failed.
+  """
+  DEAD
+}
+
+"""
+Specifies how a client is supposed to interrupt cell execution on this kernel.
+"""
+enum KernelSpecInterruptMode {
+  "Send an interrupt signal via the operating system’s signalling facilities (e.g. `SIGINT` on POSIX systems)"
+  SIGNAL
+  "Send an `interrupt_request` message on the control channel (see Kernel interrupt)."
+  MESSAGE
+}
+
+input StartKernelInput {
+  """
+  Kernel spec name (defaults to default kernel spec for server)
+
+  # TODO: Should this be a kernel spec ID instead of a name?
+  """
+  kernelspecName: String
+
+  """
+  API path from root to the cwd of the kernel
+  """
+  path: String
+}
+
+type StartKernelPayload {
+  """
+  The kernel that was started
+  """
+  kernel: Kernel!
+}
+
+input StopKernelInput {
+  """
+  The ID of the kernel to stop
+  """
+  id: ID!
+}
+
+type StopKernelPayload {
+  """
+  The kernel ID that was triggered to stop.
+  """
+  id: ID!
+}
+
+input InterruptKernelInput {
+  """
+  The ID of the kernel to interrupt
+  """
+  id: ID!
+}
+
+type InterruptKernelPayload {
+  """
+  The kernel that was interrupted
+  """
+  kernel: Kernel!
+}
+
+input RestartKernelInput {
+  """
+  The ID of the kernel to restart
+  """
+  id: ID!
+}
+
+type ShellError {
+  name: String!
+  value: String!
+  traceback: [String!]!
+}
+
+type ShellAbort {
+  _: Boolean
+}
+
+type RestartKernelPayload {
+  """
+  The kernel that was restarted
+  """
+  kernel: Kernel!
+}

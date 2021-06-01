@@ -1,0 +1,215 @@
+extend type Query {
+  """
+  Retrieve an execution.
+  """
+  execution(id: ID!): Execution
+}
+
+extend type Kernel {
+  """
+  All executions from this kernel, ordered newest to oldest.
+  """
+  executions: [Execution!]!
+}
+
+extend type Mutation {
+  """
+  Start executing some code. Does not block for code to finish executing.
+  """
+  execute(input: ExecuteInput!): ExecutePayload
+}
+
+extend type Subscription {
+  """
+  Every execution for this kernel.
+  """
+  executions(kernelId: ID!): Execution
+
+  """
+  Listen to events about an execution
+  """
+  executionEvents(executionID: ID!): ExecutionEventPayload
+}
+
+type Execution implements Node {
+  id: ID!
+  code: String!
+
+  """
+  The kernel this execution was a part of, if it is still running.
+  """
+  kernel: Kernel
+  """
+  The session of the kernel, present if and only if the kernel is present
+
+  TODO: When to update this? When first reply about execution is sent?
+  """
+  kernelSession: String
+
+  """
+  Only present if the request has finished.
+  """
+  status: ExecutionState
+
+  """
+  A list of all displays.
+
+  On a display update, any displays with that ID will be updated.
+
+  On clear output, all previous displays will be cleared.
+  """
+  displays: [Display!]!
+  # displays(
+  #   first: Int
+  #   last: Int
+  #   before: Cursor
+  #   after: Cursor
+  # ): DisplaysConnection!
+
+  """
+  An input request, if active.
+  """
+  inputRequest: InputRequest
+}
+
+type DisplaysConnection {
+  edges: [DisplaysEdge!]!
+  pageInfo: PageInfo!
+}
+
+type DisplaysEdge {
+  cursor: Cursor!
+  node: Display!
+}
+
+union ExecutionState =
+    ExecutionStateOK
+  | ExecutionStateAbort
+  | ExecutionStateError
+
+type ExecutionStateOK {
+  executionCount: Int
+  """
+  Data as JSON.
+
+  We could represent as map, and add pagination, if we want to add support
+  for just getting some data or metadata, but not all of it.
+  """
+  data: JSON!
+  metadata: JSON!
+}
+
+type ExecutionStateError {
+  value: String!
+  traceback: [String!]!
+  executionCount: Int
+}
+
+type ExecutionStateAbort {
+  executionCount: Int
+}
+
+union Display = DisplayStream | DisplayData
+
+enum DisplayStreamName {
+  STDOUT
+  STDERR
+}
+
+type DisplayStream {
+  name: DisplayStreamName!
+  text: String!
+}
+
+type DisplayData {
+  data: JSON!
+  metadata: JSON!
+  displayID: String
+}
+
+input ExecuteInput {
+  """
+  The ID of the kernel to execute on
+  """
+  kernel: ID!
+
+  """
+  Source code to be executed by the kernel, one or more lines.
+  """
+  code: String!
+
+  # TODO: Implement below:
+
+  # """
+  # A boolean flag which, if True, signals the kernel to execute
+  # this code as quietly as possible.
+  # silent=True forces store_history to be False,
+  # and will *not*:
+  #   - broadcast output on the IOPUB channel
+  #   - have an execute_result
+  # The default is False.
+  # """
+  # silent: Boolean
+
+  # """
+  # A boolean flag which, if True, signals the kernel to populate history
+  # The default is True if silent is False.  If silent is True, store_history
+  # is forced to be False.
+  # """
+  # storeHistory: Boolean
+
+  # """
+  # A JSON serialized dict mapping names to expressions to be evaluated in the
+  # user's dict. The rich display-data representation of each will be evaluated after execution.
+  # See the display_data content for the structure of the representation data.
+
+  # Default is empty.
+  # """
+  # userExpressions: JSON
+  # """
+  # Some frontends do not support stdin requests.
+  # If this is true, code running in the kernel can prompt the user for input
+  # with an input_request message. If it is false, the kernel
+  # should not send these messages.
+
+  # Defaults to true.
+  # """
+  # allowStdin: Boolean
+
+  # """
+  # A boolean flag, which, if True, aborts the execution queue if an exception is encountered.
+  # If False, queued execute_requests will execute even if this request generates an exception.
+
+  # Defaults to true.
+  # """
+  # stopOnError: Boolean
+}
+
+type ExecutePayload {
+  execution: Execution!
+}
+
+type ExecutionEventPayload {
+  execution: Execution!
+  event: ExecutionEvent!
+}
+
+union ExecutionEvent =
+    DisplayStream
+  | DisplayData
+  | InputRequest
+  | ClearOutputEvent
+  | ExecutionStateOK
+  | ExecutionStateAbort
+  | ExecutionStateError
+"""
+Clear all existing output.
+"""
+type ClearOutputEvent {
+  """
+  Wait to clear the output until new output is available.  Clears the
+  existing output immediately before the new output is displayed.
+  Useful for creating simple animations with minimal flickering.
+  """
+  wait: Boolean!
+}

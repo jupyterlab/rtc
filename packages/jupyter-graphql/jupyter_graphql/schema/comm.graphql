@@ -1,0 +1,87 @@
+# API to allow opening comms, closing comms, sending messages over existing comms, listening to messages
+# on existing comms, and listening to when comms open and close.
+
+extend type Query {
+  comm(id: ID!): Comm
+}
+
+extend type Kernel {
+  """
+  All comms on this kernel.
+  """
+  comms: [Comm!]!
+}
+
+extend type Mutation {
+  openComm(input: OpenCommInput!): OpenCommPayload
+
+  sendCommMessage(input: SendCommMessageInput!): SendCommMessagePayload
+
+  closeComm(input: CloseCommInput!): CloseCommPayload
+}
+
+extend type Subscription {
+  """
+  Triggered when a new comm is opened on this kernel.
+
+  Closed when the kernel is deleted.
+  """
+  commOpened(kernelID: ID!): Comm!
+
+  """
+  Triggered when a comm is closed on this kernel, returns the id of the comm.
+
+  Closed when kernel is closed
+  """
+  commClosed(kernelID: ID!): ID!
+
+  """
+  Listen to messages about this comm, closed when comm is closed
+  """
+  commMessages(ID: ID!): CommMessage!
+}
+
+type Comm implements Node {
+  id: ID!
+
+  """
+  The ID of the kernel this comm is started in
+  """
+  kernelID: ID!
+
+  """
+  The target of the comm
+  """
+  targetName: String!
+}
+
+input OpenCommInput {
+  targetName: String!
+  data: JSON!
+}
+
+type OpenCommPayload {
+  comm: Comm!
+}
+
+input SendCommMessageInput {
+  id: ID!
+  data: JSON!
+}
+
+type SendCommMessagePayload {
+  comm: Comm!
+}
+
+input CloseCommInput {
+  id: ID!
+}
+
+type CloseCommPayload {
+  id: ID!
+}
+
+type CommMessage {
+  comm: Comm!
+  data: JSON!
+}
