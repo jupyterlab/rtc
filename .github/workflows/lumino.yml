@@ -7,7 +7,10 @@ jobs:
     - uses: actions/setup-node@v2-beta
       with:
         node-version: '14'
-    - run: cd lumino
-    - run: yarn
-    - run: yarn run build:tsc
-    - run: yarn run test:firefox:headless
+    - name: Build and test 
+      run: |
+        cd lumino
+        yarn
+        yarn run build:tsc
+        yarn run test:firefox:headless
+
